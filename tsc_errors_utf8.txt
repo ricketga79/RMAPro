@@ -1,0 +1,44 @@
+﻿node_modules/@supabase/auth-js/src/GoTrueClient.ts(731,7): error TS2322: Type '{ data: { weakPassword: WeakPassword; user: User; session: Session; }; error: AuthError; }' is not assignable to type 'AuthTokenResponsePassword'.
+  Type '{ data: { weakPassword: WeakPassword; user: User; session: Session; }; error: AuthError; }' is not assignable to type '{ data: { user: null; session: null; weakPassword?: null; }; error: AuthError; }'.
+    The types of 'data.user' are incompatible between these types.
+      Type 'User' is not assignable to type 'null'.
+node_modules/@supabase/auth-js/src/lib/helpers.ts(107,37): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+node_modules/@supabase/auth-js/src/lib/helpers.ts(109,29): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+node_modules/@supabase/functions-js/src/helper.ts(5,37): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+node_modules/@supabase/functions-js/src/helper.ts(7,29): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+node_modules/@supabase/realtime-js/src/RealtimeClient.ts(531,39): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+node_modules/@supabase/realtime-js/src/RealtimeClient.ts(533,31): error TS2556: A spread argument must either have a tuple type or be passed to a rest parameter.
+src/components/Dashboard.tsx(83,13): error TS2322: Type '{ id: any; customerId: any; clientName: any; status: any; warranty: any; seqNumber: any; year: any; dateCreated: string; items: { productId: any; productName: any; productReference: any; quantity: any; serialNumber: any; faultDescription: any; warranty: any; }[]; }[]' is not assignable to type 'RMA[]'.
+  Type '{ id: any; customerId: any; clientName: any; status: any; warranty: any; seqNumber: any; year: any; dateCreated: string; items: { productId: any; productName: any; productReference: any; quantity: any; serialNumber: any; faultDescription: any; warranty: any; }[]; }' is not assignable to type 'RMA'.
+    Types of property 'items' are incompatible.
+      Type '{ productId: any; productName: any; productReference: any; quantity: any; serialNumber: any; faultDescription: any; warranty: any; }[]' is not assignable to type 'RMAItem[]'.
+        Property 'id' is missing in type '{ productId: any; productName: any; productReference: any; quantity: any; serialNumber: any; faultDescription: any; warranty: any; }' but required in type 'RMAItem'.
+src/components/Dashboard.tsx(294,34): error TS2339: Property 'equipment' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(294,50): error TS2339: Property 'itemsCount' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(294,76): error TS2339: Property 'itemsCount' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(296,32): error TS2339: Property 'productReference' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(297,99): error TS2339: Property 'productReference' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(323,27): error TS2339: Property 'warranty' does not exist on type 'RMA'.
+src/components/Dashboard.tsx(327,28): error TS2339: Property 'warranty' does not exist on type 'RMA'.
+src/components/RMAManagement.tsx(123,36): error TS2345: Argument of type '{ id: any; name: any; }[]' is not assignable to parameter of type 'SetStateAction<Customer[]>'.
+  Type '{ id: any; name: any; }[]' is not assignable to type 'Customer[]'.
+    Type '{ id: any; name: any; }' is missing the following properties from type 'Customer': type, contact, email
+src/components/RMAManagement.tsx(124,35): error TS2345: Argument of type '{ id: any; name: any; reference: any; serial_required: any; }[]' is not assignable to parameter of type 'SetStateAction<Product[]>'.
+  Type '{ id: any; name: any; reference: any; serial_required: any; }[]' is not assignable to type 'Product[]'.
+    Type '{ id: any; name: any; reference: any; serial_required: any; }' is missing the following properties from type 'Product': brand, serialRequired
+src/components/RMAManagement.tsx(125,36): error TS2345: Argument of type '{ id: any; name: any; }[]' is not assignable to parameter of type 'SetStateAction<Supplier[]>'.
+  Type '{ id: any; name: any; }[]' is not assignable to type 'Supplier[]'.
+    Type '{ id: any; name: any; }' is missing the following properties from type 'Supplier': contact, email, activeRMAs, initials
+src/components/RMAManagement.tsx(445,40): error TS2339: Property 'repairDescription' does not exist on type '{ productRef: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }'.
+src/components/RMAManagement.tsx(446,35): error TS2339: Property 'repairStatus' does not exist on type '{ productRef: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }'.
+src/components/RMAManagement.tsx(458,7): error TS2353: Object literal may only specify known properties, and 'repairDescription' does not exist in type 'SetStateAction<{ productRef: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }>'.
+src/components/RMAManagement.tsx(964,61): error TS2339: Property 'repairStatus' does not exist on type '{ productId: string; productName: string; productReference: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }'.
+src/components/RMAManagement.tsx(972,39): error TS2339: Property 'repairStatus' does not exist on type '{ productId: string; productName: string; productReference: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }'.
+src/components/RMAManagement.tsx(976,45): error TS2339: Property 'repairStatus' does not exist on type '{ productId: string; productName: string; productReference: string; quantity: number; serialNumber: string; faultDescription: string; warranty: "Ativa" | "Expirada"; }'.
+src/components/SupplierRMAManagement.tsx(86,33): error TS2345: Argument of type '{ id: any; name: any; color: any; }[]' is not assignable to parameter of type 'SetStateAction<RMAStatus[]>'.
+  Type '{ id: any; name: any; color: any; }[]' is not assignable to type 'RMAStatus[]'.
+    Property 'category' is missing in type '{ id: any; name: any; color: any; }' but required in type 'RMAStatus'.
+src/constants.ts(8,5): error TS2353: Object literal may only specify known properties, and 'productId' does not exist in type 'RMA'.
+src/constants.ts(19,5): error TS2353: Object literal may only specify known properties, and 'productId' does not exist in type 'RMA'.
+src/constants.ts(30,5): error TS2353: Object literal may only specify known properties, and 'productId' does not exist in type 'RMA'.
+src/constants.ts(41,5): error TS2353: Object literal may only specify known properties, and 'productId' does not exist in type 'RMA'.
