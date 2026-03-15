@@ -1,20 +1,70 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# RMAPro — Gestão de RMA
 
-# Run and deploy your AI Studio app
+Sistema de gestão de RMA (Return Merchandise Authorization) para clientes e fornecedores, construído com React, TypeScript, Vite e Supabase.
 
-This contains everything you need to run your app locally.
+## 🚀 Deploy na Vercel
 
-View your app in AI Studio: https://ai.studio/apps/0cd62a0f-b3b9-40d9-ae52-1cd0605c1881
+### Pré-requisitos
+- Conta na [Vercel](https://vercel.com)
+- Projeto no [Supabase](https://supabase.com) configurado
 
-## Run Locally
+### Passos
 
-**Prerequisites:**  Node.js
+1. **Fork / clone** este repositório no GitHub
+2. **Importar projeto na Vercel:**
+   - Acede a [vercel.com/new](https://vercel.com/new) e importa o repositório
+   - **Root Directory:** `RMAPro`
+   - **Framework Preset:** Vite (deteta automaticamente)
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
 
+3. **Configurar variáveis de ambiente** na Vercel (Settings → Environment Variables):
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   | Variável | Valor |
+   |---|---|
+   | `VITE_SUPABASE_URL` | URL do teu projeto Supabase |
+   | `VITE_SUPABASE_ANON_KEY` | Chave anon/public do Supabase |
+
+   > Encontras estes valores em **Supabase → Settings → API**
+
+4. **Deploy!** A Vercel faz o build e publica automaticamente.
+
+---
+
+## 💻 Desenvolvimento Local
+
+### Pré-requisitos
+- Node.js 18+
+
+### Instalação
+
+```bash
+# Instalar dependências
+npm install
+
+# Copiar variáveis de ambiente
+cp .env.example .env
+
+# Preencher o .env com as tuas credenciais Supabase
+# VITE_SUPABASE_URL=...
+# VITE_SUPABASE_ANON_KEY=...
+
+# Iniciar servidor de desenvolvimento
+npm run dev
+```
+
+### Build de produção
+
+```bash
+npm run build
+```
+
+---
+
+## 🛠️ Stack Técnica
+
+- **Frontend:** React 18 + TypeScript + Vite
+- **Estilo:** Tailwind CSS v4
+- **Base de dados:** Supabase (PostgreSQL)
+- **Autenticação:** Supabase Auth
+- **Deploy:** Vercel
