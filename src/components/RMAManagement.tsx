@@ -68,8 +68,8 @@ export const RMAManagement = () => {
       .from('rmas')
       .select(`
         *,
-        customers(id, name, email, phone),
-        suppliers(id, name, email, phone),
+        customers(id, name, email, contact),
+        suppliers(id, name, email, contact),
         rma_items(
           id,
           product_id,
