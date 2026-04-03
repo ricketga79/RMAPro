@@ -68,8 +68,8 @@ export const RMAManagement = () => {
       .from('rmas')
       .select(`
         *,
-        customers(id, name, vat_number, address, city, postal_code, country, email, phone),
-        suppliers(id, name, vat_number, address, city, postal_code, country, email, phone),
+        customers(id, name, email, phone),
+        suppliers(id, name, email, phone),
         rma_items(
           id,
           product_id,
@@ -79,7 +79,7 @@ export const RMAManagement = () => {
           repair_description,
           repair_status,
           warranty,
-          products(id, name, reference, description, category, supplier_id, purchase_price, sale_price, stock_quantity, min_stock_level, max_stock_level, active)
+          products(id, name, reference)
         )
       `)
       .order('created_at', { ascending: false });
@@ -87,6 +87,7 @@ export const RMAManagement = () => {
     if (rmaError) {
       console.error('Error fetching RMAs:', rmaError);
     } else if (rmaData) {
+      console.log('[DEBUG] fetchData - rmaData:', rmaData);
       const mapped: RMA[] = (rmaData as any[]).map(r => ({
         id: r.id,
         customerId: r.customer_id,
@@ -209,6 +210,9 @@ export const RMAManagement = () => {
 
     return matchesSearch && !isSkua && matchesTab;
   });
+
+  console.log('[DEBUG] filteredRmas - all rmas:', rmas.length, 'filtered:', filteredRmas.length, 'activeFilter:', activeFilter, 'SKUA_CUSTOMER_ID:', SKUA_CUSTOMER_ID);
+  console.log('[DEBUG] filteredRmas - isSkua check will filter:', rmas.filter(r => r.customerId === SKUA_CUSTOMER_ID).length, 'RMAs');
 
   const totalPages = Math.ceil(filteredRmas.length / itemsPerPage);
   const paginatedRmas = filteredRmas.slice(
@@ -343,6 +347,8 @@ export const RMAManagement = () => {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    console.log('[DEBUG] handleSaveRma - newRma:', newRma);
+
     const payload: any = {
       customer_id: newRma.customerId,
       supplier_id: newRma.supplierId || null,
@@ -350,6 +356,8 @@ export const RMAManagement = () => {
       odoo_doc: newRma.odooDoc.trim(),
       updated_at: new Date().toISOString()
     };
+
+    console.log('[DEBUG] handleSaveRma - payload:', payload);
 
     // Trigger for Supplier RMA
     if (newRma.status === 'Aguarda Envio ao Fornecedor') {
@@ -386,6 +394,7 @@ export const RMAManagement = () => {
         seq_number: nextSeq,
         year: currentYear
       }]).select();
+      console.log('[DEBUG] handleSaveRma - insert result:', res);
       error = res.error;
       if (res.data && res.data[0]) rmaId = res.data[0].id;
     }
