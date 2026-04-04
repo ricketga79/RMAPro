@@ -370,15 +370,30 @@ export const RMAManagement = () => {
   const handleDeleteSingleItem = async (rma: RMA, itemIndex: number) => {
     const item = rma.items?.[itemIndex];
     if (!item || !item.id) return;
-    if (!window.confirm(`Tem a certeza que deseja eliminar o artigo "${item.productName}" desta RMA?`)) return;
     
-    const { error } = await supabase.from('rma_items').delete().eq('id', item.id);
-    if (error) {
-      alert('Erro ao eliminar artigo: ' + error.message);
-    } else {
-      setViewingRma(null);
-      fetchData();
+    const isLastItem = rma.items.length === 1;
+    const confirmMsg = isLastItem 
+      ? `Tem a certeza que deseja eliminar o artigo "${item.productName}"? A RMA será eliminada por completo.`
+      : `Tem a certeza que deseja eliminar o artigo "${item.productName}" desta RMA?`;
+    
+    if (!window.confirm(confirmMsg)) return;
+    
+    const { error: itemError } = await supabase.from('rma_items').delete().eq('id', item.id);
+    if (itemError) {
+      alert('Erro ao eliminar artigo: ' + itemError.message);
+      return;
     }
+    
+    if (isLastItem) {
+      const { error: rmaError } = await supabase.from('rmas').delete().eq('id', rma.id);
+      if (rmaError) {
+        alert('Erro ao eliminar RMA: ' + rmaError.message);
+        return;
+      }
+    }
+    
+    setViewingRma(null);
+    fetchData();
   };
 
   const handleDeleteRma = async (id: string) => {
