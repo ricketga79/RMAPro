@@ -437,21 +437,10 @@ export const RMAManagement = () => {
 
     console.log('[DEBUG] handleSaveRma - newRma:', newRma);
     console.log('[DEBUG] handleSaveRma - isEditingSingleItem:', isEditingSingleItem);
-
-    const hasSupplierStatus = newRma.items.some(item => item.repairStatus === 'Aguarda Envio ao Fornecedor');
-    console.log('[DEBUG] handleSaveRma - hasSupplierStatus:', hasSupplierStatus, 'items:', newRma.items);
-
-    const payload: any = {
-      customer_id: newRma.customerId,
-      supplier_id: newRma.supplierId || null,
-      status: newRma.status,
-      odoo_doc: newRma.odooDoc.trim(),
-      updated_at: new Date().toISOString()
-    };
-
     console.log('[DEBUG] handleSaveRma - payload:', payload);
 
     const hasSupplierStatus = newRma.items.some(item => item.repairStatus === 'Aguarda Envio ao Fornecedor');
+    console.log('[DEBUG] handleSaveRma - hasSupplierStatus:', hasSupplierStatus, 'items:', newRma.items);
 
     if (hasSupplierStatus || newRma.status === 'Aguarda Envio ao Fornecedor') {
       payload.is_supplier_active = true;
