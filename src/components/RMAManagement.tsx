@@ -436,6 +436,10 @@ export const RMAManagement = () => {
     setErrorMsg(null);
 
     console.log('[DEBUG] handleSaveRma - newRma:', newRma);
+    console.log('[DEBUG] handleSaveRma - isEditingSingleItem:', isEditingSingleItem);
+
+    const hasSupplierStatus = newRma.items.some(item => item.repairStatus === 'Aguarda Envio ao Fornecedor');
+    console.log('[DEBUG] handleSaveRma - hasSupplierStatus:', hasSupplierStatus, 'items:', newRma.items);
 
     const payload: any = {
       customer_id: newRma.customerId,
