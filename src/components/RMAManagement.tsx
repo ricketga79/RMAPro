@@ -998,6 +998,24 @@ export const RMAManagement = () => {
                                 <span className={`font-black uppercase tracking-widest ${item.warranty === 'Ativa' ? 'text-emerald-500' : 'text-rose-500'}`}>{item.warranty}</span>
                               </div>
                             </div>
+
+                            <div className="mb-2">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado RMA Cliente</label>
+                              <select 
+                                value={item.repairStatus || ''}
+                                onChange={e => {
+                                  const updated = [...newRma.items];
+                                  updated[idx] = { ...updated[idx], repairStatus: e.target.value };
+                                  setNewRma({ ...newRma, items: updated });
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
+                              >
+                                <option value="">Selecionar Estado</option>
+                                {statuses.map(s => (
+                                  <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                              </select>
+                            </div>
                             
                             {(item.faultDescription || item.repairStatus) && (
                               <div className="space-y-2 pt-2 border-t border-slate-50 dark:border-slate-800">
