@@ -1120,6 +1120,14 @@ export const RMAManagement = () => {
                             
                             {(item.faultDescription || (!newRma.supplierStatus && item.repairStatus)) && (
                               <div className="space-y-2 pt-2 border-t border-slate-50 dark:border-slate-800">
+                                {newRma.supplierStatus && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-black text-orange-500 uppercase tracking-tighter shrink-0">ESTADO FORNECEDOR:</span>
+                                    <span className="text-[9px] font-black bg-orange-50 dark:bg-orange-900/40 text-orange-600 dark:text-orange-300 px-2 py-0.5 rounded uppercase tracking-widest border border-orange-100 dark:border-orange-800">
+                                      {newRma.supplierStatus}
+                                    </span>
+                                  </div>
+                                )}
                                 {item.faultDescription && (
                                   <div className="flex gap-2">
                                     <span className="text-[9px] font-black text-amber-500 uppercase tracking-tighter shrink-0 pt-0.5">AVARIA:</span>
