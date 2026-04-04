@@ -810,7 +810,7 @@ export const RMAManagement = () => {
                                     <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{rma.odooDoc}</span>
                                   </div>
                                 )}
-                                {item.repairStatus && (
+                                {!rma.supplierStatus && item.repairStatus && (
                                   <div className="mt-1">
                                     <StatusBadge 
                                       status={item.repairStatus} 
