@@ -7,6 +7,7 @@ import { Customers } from './components/Customers';
 import { RMAManagement } from './components/RMAManagement';
 import { SupplierRMAManagement } from './components/SupplierRMAManagement';
 import { RMAStatusManagement } from './components/RMAStatusManagement';
+import { SupplierStatusManagement } from './components/SupplierStatusManagement';
 import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
 import type { Session } from '@supabase/supabase-js';
@@ -63,6 +64,8 @@ export default function App() {
         return <SupplierRMAManagement />;
       case 'statuses':
         return <RMAStatusManagement />;
+      case 'supplier_statuses':
+        return <SupplierStatusManagement />;
       default:
         return <Dashboard />;
     }

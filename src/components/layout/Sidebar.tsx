@@ -85,6 +85,12 @@ export const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
           active={activeTab === 'statuses'}
           onClick={() => setActiveTab('statuses')}
         />
+        <SidebarItem
+          icon={<Palette size={20} />}
+          label="Estados RMA Fornecedor"
+          active={activeTab === 'supplier_statuses'}
+          onClick={() => setActiveTab('supplier_statuses')}
+        />
       </nav>
 
     </aside>
