@@ -473,14 +473,6 @@ export const SupplierRMAManagement = () => {
                                     <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{rma.odooDoc}</span>
                                   </div>
                                 )}
-                                {item.repairStatus && (
-                                  <div className="mt-1">
-                                    <StatusBadge 
-                                      status={item.repairStatus} 
-                                      color={statuses.find(s => s.name === item.repairStatus)?.color} 
-                                    />
-                                  </div>
-                                )}
                                 <div className="mt-1">
                                   <StatusBadge 
                                     status={rma.supplierStatus || 'Pendente de Envio'} 
