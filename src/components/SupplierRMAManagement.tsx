@@ -475,6 +475,12 @@ export const SupplierRMAManagement = () => {
                                     />
                                   </div>
                                 )}
+                                <div className="mt-1">
+                                  <StatusBadge 
+                                    status={rma.supplierStatus || 'Pendente de Envio'} 
+                                    color={statuses.find(s => s.name === rma.supplierStatus)?.color} 
+                                  />
+                                </div>
                               </div>
                            </div>
                          ))}
