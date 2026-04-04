@@ -31,6 +31,7 @@ export const SupplierRMAManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statuses, setStatuses] = useState<RMAStatus[]>([]); // Changed type from {id: string, name: string, color: string}[] to RMAStatus[]
   const [viewingRma, setViewingRma] = useState<RMA | null>(null);
+  const [viewingItemIndex, setViewingItemIndex] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeFilter, setActiveFilter] = useState<'open' | 'completed' | 'all'>('open');
   const [resolutionModal, setResolutionModal] = useState<{ isOpen: boolean; rmaId: string; status: string; creditNote: string; resolutionNote: string } | null>(null);
@@ -179,6 +180,46 @@ export const SupplierRMAManagement = () => {
     });
     setErrorMsg(null);
     setIsModalOpen(true);
+  };
+
+  const handleEditSingleItem = (rma: RMA, itemIndex: number) => {
+    const item = rma.items?.[itemIndex];
+    if (!item) return;
+    setEditingId(rma.id);
+    setNewRma({
+      customerId: rma.customerId,
+      supplierId: rma.supplierId,
+      status: rma.status,
+      supplierStatus: rma.supplierStatus,
+      odooDoc: rma.odooDoc,
+      items: [{
+        id: item.id,
+        productId: item.productId,
+        productName: item.productName || '',
+        productReference: item.productReference || '',
+        quantity: item.quantity,
+        serialNumber: item.serialNumber || '',
+        faultDescription: item.faultDescription || '',
+        repairDescription: item.repairDescription || '',
+        repairStatus: item.repairStatus || '',
+        warranty: item.warranty
+      }]
+    });
+    setErrorMsg(null);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteSingleItem = async (rma: RMA, itemIndex: number) => {
+    const item = rma.items?.[itemIndex];
+    if (!item || !item.id) return;
+    if (!window.confirm(`Tem a certeza que deseja eliminar o artigo "${item.productName}" desta RMA?`)) return;
+    const { error } = await supabase.from('rma_items').delete().eq('id', item.id);
+    if (error) {
+      alert('Erro ao eliminar artigo: ' + error.message);
+    } else {
+      setViewingRma(null);
+      fetchData();
+    }
   };
 
   const handleSaveRma = async (e: React.FormEvent) => {
@@ -377,9 +418,6 @@ export const SupplierRMAManagement = () => {
                   <th className="px-6 py-4 text-center">CLIENTE</th>
                   <th className="px-6 py-4 text-center">FORNECEDOR</th>
                   <th className="px-6 py-4 text-center">ARTIGO</th>
-                  <th className="px-6 py-4 text-center">ESTADO</th>
-                  <th className="px-6 py-4 text-center">DOC. ODOO</th>
-                  <th className="px-6 py-4 text-center">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -405,98 +443,42 @@ export const SupplierRMAManagement = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2 items-center">
                         {rma.items?.map((item, idx) => (
-                          <div key={idx} className="w-full max-w-[240px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30">
+                          <div 
+                            key={idx} 
+                            onClick={() => { setViewingRma(rma); setViewingItemIndex(idx); }}
+                            className="w-full max-w-[240px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30 cursor-pointer"
+                          >
                              <div className="flex items-start justify-between gap-2 mb-1">
                                <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight flex-1">{item.productName}</span>
                                <span className="shrink-0 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-md font-black">x{item.quantity}</span>
                              </div>
-                             <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800/60 pt-1 mt-1">
-                               <div className="flex items-center gap-1.5">
-                                 <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">REF</span>
-                                 <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{item.productReference}</span>
-                               </div>
-                               <div className="flex items-center gap-1.5">
-                                 <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">S/N</span>
-                                 <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">{item.serialNumber || 'N/A'}</span>
-                               </div>
-                               {item.repairStatus && (
-                                 <div className="mt-1">
-                                   <StatusBadge 
-                                     status={item.repairStatus} 
-                                     color={statuses.find(s => s.name === item.repairStatus)?.color} 
-                                   />
-                                 </div>
-                               )}
-                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <select 
-                          value={rma.supplierStatus}
-                          onChange={async (e) => {
-                            const newStatus = e.target.value;
-                            if (newStatus === 'Crédito do Fornecedor' || newStatus === 'Reparado/Substituído') {
-                              setResolutionModal({
-                                isOpen: true,
-                                rmaId: rma.id,
-                                status: newStatus,
-                                creditNote: rma.supplierCreditNote || '',
-                                resolutionNote: rma.supplierResolutionNote || ''
-                              });
-                            } else {
-                              const updatePayload: any = { supplier_status: newStatus };
-                              if (supplierToClientStatus[newStatus]) {
-                                updatePayload.status = supplierToClientStatus[newStatus];
-                              }
-                              const { error } = await supabase
-                                .from('rmas')
-                                .update(updatePayload)
-                                .eq('id', rma.id);
-                              if (!error) fetchData();
-                            }
-                          }}
-                          className="bg-transparent font-bold text-xs focus:outline-none cursor-pointer hover:text-blue-600 transition-colors text-center"
-                        >
-                          {statuses.filter(s => s.category === 'supplier').map(s => (
-                            <option key={s.id} value={s.name}>{s.name}</option>
-                          ))}
-                        </select>
-                        <StatusBadge 
-                          status={rma.supplierStatus || ''} 
-                          color={statuses.find(s => s.name === rma.supplierStatus)?.color} 
-                        />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                       <span className="text-xs font-bold text-blue-500 font-mono underline decoration-blue-500/30 cursor-pointer">{rma.odooDoc || '---'}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button 
-                          onClick={() => setViewingRma(rma)}
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                          title="Ver Detalhes"
-                        >
-                          <Eye size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleEditClick(rma)}
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                          title="Editar"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteRma(rma.id)}
-                          className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
+                              <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800/60 pt-1 mt-1 text-left">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">REF</span>
+                                  <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{item.productReference}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">S/N</span>
+                                  <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">{item.serialNumber || 'N/A'}</span>
+                                </div>
+                                {rma.odooDoc && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">DOC</span>
+                                    <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{rma.odooDoc}</span>
+                                  </div>
+                                )}
+                                {item.repairStatus && (
+                                  <div className="mt-1">
+                                    <StatusBadge 
+                                      status={item.repairStatus} 
+                                      color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                           </div>
+                         ))}
+                       </div>
                     </td>
                   </tr>
                 ))}
@@ -518,39 +500,81 @@ export const SupplierRMAManagement = () => {
         )}
       </div>
 
-      {/* Detail Drawer (Simplified Version) */}
       {viewingRma && (
-        <div className="fixed inset-0 z-[60] flex justify-end">
-          <div 
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setViewingRma(null)}
-          ></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full border-l border-slate-200 dark:border-slate-800 flex flex-col animate-slide-in-right">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Processo Fornecedor</span>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  {viewingRma.seqNumber ? `RMA#${viewingRma.seqNumber.toString().padStart(3, '0')}/${viewingRma.year}` : `RMA#${viewingRma.id.split('-')[0]}`}
-                </h3>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-600 rounded-lg text-white">
+                  <Eye size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Processo Fornecedor</span>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {viewingRma.seqNumber ? `RMA#${viewingRma.seqNumber.toString().padStart(3, '0')}/${viewingRma.year}` : `RMA#${viewingRma.id.split('-')[0]}`}
+                  </h3>
+                </div>
               </div>
-              <button onClick={() => setViewingRma(null)} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all hover:rotate-90">
+              <button 
+                onClick={() => setViewingRma(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              >
                 <X size={20} />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              <div className="grid grid-cols-3 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cliente</span>
-                  <p className="font-bold text-slate-900 dark:text-white">{viewingRma.clientName}</p>
+                  <p className="font-bold text-slate-900 dark:text-white">{viewingRma.clientName || '---'}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fornecedor</span>
-                  <p className="font-bold text-slate-900 dark:text-white">{viewingRma.supplierName}</p>
+                  <p className="font-bold text-slate-900 dark:text-white">{viewingRma.supplierName || '---'}</p>
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Doc. Odoo</span>
-                  <p className="font-mono font-bold text-blue-500 underline">{viewingRma.odooDoc}</p>
+                  <p className="text-sm font-mono text-blue-500 font-bold">{viewingRma.odooDoc || '---'}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado Fornecedor</span>
+                  <div className="flex items-center gap-2">
+                    <select 
+                      value={viewingRma.supplierStatus || 'Pendente de Envio'}
+                      onChange={async (e) => {
+                        const newStatus = e.target.value;
+                        if (newStatus === 'Crédito do Fornecedor' || newStatus === 'Reparado/Substituído') {
+                          setResolutionModal({
+                            isOpen: true,
+                            rmaId: viewingRma.id,
+                            status: newStatus,
+                            creditNote: viewingRma.supplierCreditNote || '',
+                            resolutionNote: viewingRma.supplierResolutionNote || ''
+                          });
+                        } else {
+                          const updatePayload: any = { supplier_status: newStatus };
+                          if (supplierToClientStatus[newStatus]) {
+                            updatePayload.status = supplierToClientStatus[newStatus];
+                          }
+                          const { error } = await supabase
+                            .from('rmas')
+                            .update(updatePayload)
+                            .eq('id', viewingRma.id);
+                          if (!error) fetchData();
+                        }
+                      }}
+                      className="bg-transparent font-bold text-xs focus:outline-none cursor-pointer text-blue-600"
+                    >
+                      {statuses.filter(s => s.category === 'supplier').map(s => (
+                        <option key={s.id} value={s.name}>{s.name}</option>
+                      ))}
+                    </select>
+                    <StatusBadge 
+                      status={viewingRma.supplierStatus || ''} 
+                      color={statuses.find(s => s.name === viewingRma.supplierStatus)?.color} 
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -594,34 +618,95 @@ export const SupplierRMAManagement = () => {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Package size={18} className="text-slate-400" />
-                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos Enviados</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                    Artigo {viewingItemIndex !== null ? viewingItemIndex + 1 : 1} de {viewingRma.items?.length}
+                  </h4>
                 </div>
-                {viewingRma.items?.map((item, idx) => (
-                  <div key={idx} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-4 shadow-sm">
-                    <div className="flex justify-between mb-3">
-                      <div>
-                        <h5 className="font-bold text-slate-900 dark:text-white text-sm">{item.productName}</h5>
-                        <p className="text-[10px] font-mono text-blue-500 font-bold">{item.productReference}</p>
+
+                {(() => {
+                  const item = viewingRma.items?.[viewingItemIndex ?? 0];
+                  if (!item) return null;
+                  return (
+                    <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700 p-5 space-y-3 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-2 opacity-5 text-slate-900 dark:text-white">
+                        <Package size={64} />
                       </div>
-                      <span className="text-[10px] font-black bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">QUANT: {item.quantity}</span>
+                      
+                      <div className="flex justify-between items-start relative z-10">
+                        <div className="space-y-1">
+                          <h5 className="font-bold text-slate-900 dark:text-white leading-tight">{item.productName}</h5>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <span className="text-xs font-mono font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
+                              {item.productReference}
+                            </span>
+                            <span className="text-[10px] font-black text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm">
+                              QUANT: {item.quantity}
+                            </span>
+                            {item.serialNumber && (
+                              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                                S/N: {item.serialNumber}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {item.repairStatus && (
+                        <div className="flex items-center gap-2 relative z-10">
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado Cliente:</span>
+                          <StatusBadge 
+                            status={item.repairStatus} 
+                            color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                          />
+                        </div>
+                      )}
+
+                      <div className="mt-2 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 relative z-10">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Info size={14} className="text-amber-500" />
+                          <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Descrição da Avaria</span>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                          {item.faultDescription ? (
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                              {item.faultDescription}
+                            </p>
+                          ) : (
+                            <p className="text-xs italic text-slate-400">Nenhuma descrição técnica foi fornecida.</p>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {item.faultDescription && (
-                      <div className="bg-amber-50/50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100/50 dark:border-amber-800/50 mb-3">
-                        <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest block mb-1">Falha Reportada</span>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 italic font-medium">"{item.faultDescription}"</p>
-                      </div>
-                    )}
-                      </div>
-                ))}
+                  );
+                })()}
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-3 bg-slate-50/50 dark:bg-slate-800/50">
+              <button 
+                onClick={() => {
+                  setViewingRma(null);
+                  handleEditSingleItem(viewingRma, viewingItemIndex ?? 0);
+                }}
+                className="flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+              >
+                <Edit2 size={16} />
+                Editar
+              </button>
+              <button 
+                onClick={() => {
+                  handleDeleteSingleItem(viewingRma, viewingItemIndex ?? 0);
+                }}
+                className="flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 text-rose-500 dark:text-rose-400 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all shadow-sm"
+              >
+                <Trash2 size={16} />
+                Eliminar
+              </button>
               <button 
                 onClick={() => setViewingRma(null)}
-                className="w-full py-3 bg-slate-900 dark:bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-lg"
+                className="py-3 bg-slate-900 dark:bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-blue-600/20"
               >
-                Concluir Visualização
+                Fechar
               </button>
             </div>
           </div>
