@@ -79,6 +79,7 @@ export const SupplierRMAManagement = () => {
           quantity,
           serial_number,
           fault_description,
+          repair_status,
           warranty,
           products(name, reference)
         )
