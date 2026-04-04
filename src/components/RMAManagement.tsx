@@ -1118,7 +1118,7 @@ export const RMAManagement = () => {
                               </div>
                             )}
                             
-                            {(item.faultDescription || item.repairStatus) && (
+                            {(item.faultDescription || (!newRma.supplierStatus && item.repairStatus)) && (
                               <div className="space-y-2 pt-2 border-t border-slate-50 dark:border-slate-800">
                                 {item.faultDescription && (
                                   <div className="flex gap-2">
@@ -1126,7 +1126,7 @@ export const RMAManagement = () => {
                                     <p className="text-[10px] text-slate-500 italic line-clamp-2">{item.faultDescription}</p>
                                   </div>
                                 )}
-                                {item.repairStatus && (
+                                {!newRma.supplierStatus && item.repairStatus && (
                                   <div className="flex items-center gap-2">
                                     <span className="text-[9px] font-black text-blue-500 uppercase tracking-tighter shrink-0">ESTADO:</span>
                                     <span className="text-[9px] font-black bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded uppercase tracking-widest border border-blue-100 dark:border-blue-800">
