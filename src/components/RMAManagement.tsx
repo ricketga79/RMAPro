@@ -451,9 +451,7 @@ export const RMAManagement = () => {
 
     if (hasSupplierStatus || newRma.status === 'Aguarda Envio ao Fornecedor') {
       payload.is_supplier_active = true;
-      if (!editingId || !newRma.supplierStatus) {
-        payload.supplier_status = 'Pendente de Envio';
-      }
+      payload.supplier_status = 'Pendente de Envio';
     } else if (editingId) {
       payload.is_supplier_active = false;
     }
