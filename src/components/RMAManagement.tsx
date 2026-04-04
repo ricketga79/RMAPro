@@ -1276,12 +1276,12 @@ export const RMAManagement = () => {
                         </span>
                       </div>
 
-                      {item.repairStatus && (
+                      {(viewingRma.supplierStatus || item.repairStatus) && (
                         <div className="flex items-center gap-2 relative z-10">
                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado:</span>
                           <StatusBadge 
-                            status={item.repairStatus} 
-                            color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                            status={viewingRma.supplierStatus || item.repairStatus} 
+                            color={statuses.find(s => s.name === (viewingRma.supplierStatus || item.repairStatus))?.color} 
                           />
                         </div>
                       )}
