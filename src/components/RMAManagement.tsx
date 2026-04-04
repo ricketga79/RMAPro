@@ -650,7 +650,6 @@ export const RMAManagement = () => {
                   <th className="px-6 py-4 text-center">RMA</th>
                   <th className="px-6 py-4 text-center">CLIENTE</th>
                   <th className="px-6 py-4 text-center">ARTIGO</th>
-                  <th className="px-6 py-4 text-center">ESTADO</th>
                   <th className="px-6 py-4 text-center">DOC. ODOO</th>
                   <th className="px-6 py-4 text-center">AÇÕES</th>
                 </tr>
@@ -706,22 +705,6 @@ export const RMAManagement = () => {
                                  </div>
                                )}
                              </div>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col items-center gap-1">
-                        {rma.items?.map((item, idx) => (
-                          <div key={idx} className="mb-1">
-                            {item.repairStatus ? (
-                              <StatusBadge 
-                                status={item.repairStatus} 
-                                color={statuses.find(s => s.name === item.repairStatus)?.color} 
-                              />
-                            ) : (
-                              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">—</span>
-                            )}
                           </div>
                         ))}
                       </div>
