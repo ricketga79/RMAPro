@@ -123,7 +123,13 @@ export const SupplierRMAManagement = () => {
       }));
 
       // Filter for RMAs that are explicitly active for supplier
-      const allSupplierRmas = mapped.filter(rma => rma.isSupplierActive);
+      const supplierStatuses = ['Aguarda Envio ao Fornecedor', 'Enviado ao Fornecedor', 'Recebido do Fornecedor', 'Em Análise', 'Crédito do Fornecedor', 'Reparado/Substituído'];
+      const allSupplierRmas = mapped
+        .map(rma => ({
+          ...rma,
+          items: rma.items?.filter(item => supplierStatuses.includes(item.repairStatus)) || []
+        }))
+        .filter(rma => rma.items.length > 0);
       setRmas(allSupplierRmas);
     }
 
