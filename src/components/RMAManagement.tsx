@@ -205,7 +205,7 @@ export const RMAManagement = () => {
 
     const matchesTab = 
       activeFilter === 'all' || 
-      (activeFilter === 'open' && rma.status !== 'Concluída' && rma.status !== 'Recusada') || 
+      (activeFilter === 'open' && rma.status !== 'Concluída' && rma.status !== 'Recusada' && rma.status !== 'Aguarda Envio ao Fornecedor') || 
       (activeFilter === 'completed' && (rma.status === 'Concluída' || rma.status === 'Recusada'));
 
     return matchesSearch && !isSkua && matchesTab;
