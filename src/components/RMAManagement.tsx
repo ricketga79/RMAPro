@@ -367,6 +367,20 @@ export const RMAManagement = () => {
     setIsModalOpen(true);
   };
 
+  const handleDeleteSingleItem = async (rma: RMA, itemIndex: number) => {
+    const item = rma.items?.[itemIndex];
+    if (!item || !item.id) return;
+    if (!window.confirm(`Tem a certeza que deseja eliminar o artigo "${item.productName}" desta RMA?`)) return;
+    
+    const { error } = await supabase.from('rma_items').delete().eq('id', item.id);
+    if (error) {
+      alert('Erro ao eliminar artigo: ' + error.message);
+    } else {
+      setViewingRma(null);
+      fetchData();
+    }
+  };
+
   const handleDeleteRma = async (id: string) => {
     if (!window.confirm('Tem a certeza que deseja eliminar este registo de RMA?')) return;
     
