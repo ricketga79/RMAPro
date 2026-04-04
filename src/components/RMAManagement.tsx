@@ -803,32 +803,6 @@ export const RMAManagement = () => {
                       </select>
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Fornecedor *</label>
-                      <select 
-                        required
-                        value={newRma.supplierId}
-                        onChange={e => setNewRma({...newRma, supplierId: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all"
-                      >
-                        <option value="">Selecionar Fornecedor</option>
-                        {suppliers.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Doc. Odoo</label>
-                      <input 
-                        type="text" 
-                        value={newRma.odooDoc}
-                        onChange={e => setNewRma({...newRma, odooDoc: e.target.value})}
-                        placeholder="Ex: INV/2024/001"
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all font-mono"
-                      />
-                    </div>
-
                     {!(newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído') && (
                       <div className="md:col-span-2">
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Estado RMA Cliente</label>
@@ -950,19 +924,42 @@ export const RMAManagement = () => {
                       </div>
                     </div>
 
-                    <div className="space-y-4 pt-2">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5 md:col-span-2">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Descrição da Avaria</label>
-                          <textarea 
-                            value={itemInput.faultDescription}
-                            onChange={e => setItemInput({...itemInput, faultDescription: e.target.value})}
-                            placeholder="Descreva o problema..."
-                            rows={3}
-                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white resize-none transition-all"
-                          />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Fornecedor</label>
+                        <select 
+                          value={newRma.supplierId}
+                          onChange={e => setNewRma({...newRma, supplierId: e.target.value})}
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white transition-all"
+                        >
+                          <option value="">Selecionar Fornecedor</option>
+                          {suppliers.map(s => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                          ))}
+                        </select>
                       </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Doc. Odoo</label>
+                        <input 
+                          type="text" 
+                          value={newRma.odooDoc}
+                          onChange={e => setNewRma({...newRma, odooDoc: e.target.value})}
+                          placeholder="Ex: INV/2024/001"
+                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white font-mono transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Descrição Avaria</label>
+                      <textarea 
+                        value={itemInput.faultDescription}
+                        onChange={e => setItemInput({...itemInput, faultDescription: e.target.value})}
+                        placeholder="Descreva o problema..."
+                        rows={3}
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white resize-none transition-all"
+                      />
                     </div>
 
                     <button 
