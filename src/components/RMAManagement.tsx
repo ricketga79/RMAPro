@@ -18,6 +18,8 @@ export const RMAManagement = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [viewingRma, setViewingRma] = useState<RMA | null>(null);
   const [viewingItemIndex, setViewingItemIndex] = useState<number | null>(null);
+  const [isEditingSingleItem, setIsEditingSingleItem] = useState(false);
+  const [originalRmaItems, setOriginalRmaItems] = useState<any[]>([]);
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -325,6 +327,8 @@ export const RMAManagement = () => {
     setFoundProduct(null);
     
     setErrorMsg(null);
+    setIsEditingSingleItem(false);
+    setOriginalRmaItems([]);
     setIsModalOpen(true);
   };
 
@@ -332,6 +336,19 @@ export const RMAManagement = () => {
     const item = rma.items?.[itemIndex];
     if (!item) return;
     setEditingId(rma.id);
+    setIsEditingSingleItem(true);
+    setOriginalRmaItems(rma.items?.map(i => ({
+      id: i.id,
+      productId: i.productId,
+      productName: i.productName || '',
+      productReference: i.productReference || '',
+      quantity: i.quantity,
+      serialNumber: i.serialNumber || '',
+      faultDescription: i.faultDescription || '',
+      repairDescription: i.repairDescription || '',
+      repairStatus: i.repairStatus || '',
+      warranty: i.warranty
+    })) || []);
     setNewRma({
       customerId: rma.customerId,
       supplierId: rma.supplierId || '',
@@ -339,6 +356,7 @@ export const RMAManagement = () => {
       supplierStatus: rma.supplierStatus,
       odooDoc: rma.odooDoc || '',
       items: [{
+        id: item.id,
         productId: item.productId,
         productName: item.productName || '',
         productReference: item.productReference || '',
@@ -473,23 +491,39 @@ export const RMAManagement = () => {
     }
 
     if (!error && rmaId) {
-      // Handle items: drop and recreate for simplicity in editing, or more complex diffing
-      if (editingId) {
-        await supabase.from('rma_items').delete().eq('rma_id', rmaId);
-      }
-      
-      const itemsPayload = newRma.items.map(item => ({
-        rma_id: rmaId,
-        product_id: item.productId,
-        quantity: item.quantity,
-        serial_number: item.serialNumber.trim(),
-        fault_description: item.faultDescription?.trim(),
-        repair_status: item.repairStatus || null,
-        warranty: item.warranty
-      }));
+      if (isEditingSingleItem && editingId) {
+        const editedItem = newRma.items[0];
+        const otherItems = originalRmaItems.filter(i => i.id !== editedItem.id);
+        const allItems = [...otherItems, {
+          rma_id: rmaId,
+          product_id: editedItem.productId,
+          quantity: editedItem.quantity,
+          serial_number: editedItem.serialNumber?.trim(),
+          fault_description: editedItem.faultDescription?.trim(),
+          repair_status: editedItem.repairStatus || null,
+          warranty: editedItem.warranty
+        }];
 
-      const { error: itemsError } = await supabase.from('rma_items').insert(itemsPayload);
-      error = itemsError;
+        const { error: itemsError } = await supabase.from('rma_items').upsert(allItems);
+        error = itemsError;
+      } else {
+        if (editingId) {
+          await supabase.from('rma_items').delete().eq('rma_id', rmaId);
+        }
+        
+        const itemsPayload = newRma.items.map(item => ({
+          rma_id: rmaId,
+          product_id: item.productId,
+          quantity: item.quantity,
+          serial_number: item.serialNumber.trim(),
+          fault_description: item.faultDescription?.trim(),
+          repair_status: item.repairStatus || null,
+          warranty: item.warranty
+        }));
+
+        const { error: itemsError } = await supabase.from('rma_items').insert(itemsPayload);
+        error = itemsError;
+      }
     }
 
     setIsSubmitting(false);
@@ -539,6 +573,8 @@ export const RMAManagement = () => {
       }
 
       setIsModalOpen(false);
+      setIsEditingSingleItem(false);
+      setOriginalRmaItems([]);
       fetchData();
     }
   };
