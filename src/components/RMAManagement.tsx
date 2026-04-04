@@ -679,7 +679,11 @@ export const RMAManagement = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2 items-center">
                         {rma.items?.map((item, idx) => (
-                          <div key={idx} className="w-full max-w-[240px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30">
+                          <div 
+                            key={idx} 
+                            onClick={() => setViewingRma(rma)}
+                            className="w-full max-w-[240px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30 cursor-pointer"
+                          >
                              <div className="flex items-start justify-between gap-2 mb-1">
                                <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight flex-1">{item.productName}</span>
                                <div className="flex flex-col items-end gap-1 shrink-0">
@@ -1088,44 +1092,33 @@ export const RMAManagement = () => {
       )}
       {/* Quick View Sidebar (Drawer) */}
       {viewingRma && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div 
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setViewingRma(null)}
-          ></div>
-          <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl h-full border-l border-slate-200 dark:border-slate-800 flex flex-col animate-slide-in-right">
-            {/* Header */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Detalhes do Pedido</span>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                  {viewingRma.seqNumber ? `RMA#${viewingRma.seqNumber.toString().padStart(3, '0')}/${viewingRma.year}` : `RMA#${viewingRma.id.split('-')[0]}`}
-                </h3>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-600 rounded-lg text-white">
+                  <Eye size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Detalhes do Pedido</span>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {viewingRma.seqNumber ? `RMA#${viewingRma.seqNumber.toString().padStart(3, '0')}/${viewingRma.year}` : `RMA#${viewingRma.id.split('-')[0]}`}
+                  </h3>
+                </div>
               </div>
               <button 
                 onClick={() => setViewingRma(null)}
-                className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full transition-all hover:rotate-90"
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Content Swiper/Scrollable Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
-              {/* Client & Status Section */}
-              <div className="grid grid-cols-2 gap-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cliente</span>
                   <p className="font-bold text-slate-900 dark:text-white">{viewingRma.clientName}</p>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado Atual</span>
-                  <div>
-                    <StatusBadge 
-                      status={viewingRma.status} 
-                      color={statuses.find(s => s.name === viewingRma.status)?.color} 
-                    />
-                  </div>
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fornecedor</span>
@@ -1135,76 +1128,80 @@ export const RMAManagement = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Doc. Odoo</span>
                   <p className="text-sm font-mono text-blue-500 font-bold">{viewingRma.odooDoc || '---'}</p>
                 </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Data</span>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{viewingRma.dateCreated}</p>
+                </div>
               </div>
 
-              {/* Items Detail List */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2">
                   <Package size={18} className="text-slate-400" />
-                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos no RMA ({viewingRma.items?.length})</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos no RMA ({viewingRma.items?.length})</h4>
                 </div>
 
-                <div className="space-y-4">
-                  {viewingRma.items?.map((item, idx) => (
-                    <div key={idx} className="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700 p-5 space-y-3 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-2 opacity-5 text-slate-900 dark:text-white group-hover:opacity-10 transition-opacity">
-                         <Package size={64} />
-                      </div>
-                      
-                      <div className="flex justify-between items-start relative z-10">
-                        <div className="space-y-1">
-                          <h5 className="font-bold text-slate-900 dark:text-white leading-tight">{item.productName}</h5>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-mono font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
-                              {item.productReference}
+                {viewingRma.items?.map((item, idx) => (
+                  <div key={idx} className="bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-100 dark:border-slate-700 p-5 space-y-3 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-5 text-slate-900 dark:text-white">
+                      <Package size={64} />
+                    </div>
+                    
+                    <div className="flex justify-between items-start relative z-10">
+                      <div className="space-y-1">
+                        <h5 className="font-bold text-slate-900 dark:text-white leading-tight">{item.productName}</h5>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-xs font-mono font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded">
+                            {item.productReference}
+                          </span>
+                          <span className="text-[10px] font-black text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm">
+                            QUANT: {item.quantity}
+                          </span>
+                          {item.serialNumber && (
+                            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                              S/N: {item.serialNumber}
                             </span>
-                            <span className="text-[10px] font-black text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded-full border border-slate-100 dark:border-slate-800 shadow-sm">
-                              QUANT: {item.quantity}
-                            </span>
-                          </div>
-                        </div>
-                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border ${
-                          item.warranty === 'Ativa' 
-                            ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-500/20 dark:text-emerald-400' 
-                            : 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:border-rose-500/20 dark:text-rose-400'
-                        }`}>
-                          {item.warranty === 'Ativa' ? 'Garantia OK' : 'Sem Garantia'}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 mt-2 relative z-10">
-                        <div className="space-y-1">
-                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Número de Série</span>
-                          <p className="text-xs font-mono font-medium text-slate-600 dark:text-slate-300">
-                            {item.serialNumber || <span className="text-[10px] italic text-slate-300">N/A</span>}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Technical Note / Fault Description Section */}
-                      <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 relative z-10">
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <Info size={14} className="text-amber-500" />
-                          <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Descrição da Avaria / Observações</span>
-                        </div>
-                        <div className="bg-white dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
-                          {item.faultDescription ? (
-                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                              {item.faultDescription}
-                            </p>
-                          ) : (
-                            <p className="text-xs italic text-slate-400">Nenhuma descrição técnica foi fornecida para este artigo.</p>
                           )}
                         </div>
                       </div>
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full border shrink-0 ${
+                        item.warranty === 'Ativa' 
+                          ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-500/20 dark:text-emerald-400' 
+                          : 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:border-rose-500/20 dark:text-rose-400'
+                      }`}>
+                        {item.warranty === 'Ativa' ? 'Garantia OK' : 'Sem Garantia'}
+                      </span>
+                    </div>
 
-                     </div>
-                  ))}
-                </div>
+                    {item.repairStatus && (
+                      <div className="flex items-center gap-2 relative z-10">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado:</span>
+                        <StatusBadge 
+                          status={item.repairStatus} 
+                          color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                        />
+                      </div>
+                    )}
+
+                    <div className="mt-2 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 relative z-10">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Info size={14} className="text-amber-500" />
+                        <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">Descrição da Avaria</span>
+                      </div>
+                      <div className="bg-white dark:bg-slate-900/60 p-3 rounded-lg border border-slate-100 dark:border-slate-800">
+                        {item.faultDescription ? (
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                            {item.faultDescription}
+                          </p>
+                        ) : (
+                          <p className="text-xs italic text-slate-400">Nenhuma descrição técnica foi fornecida.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Footer Actions */}
             <div className="p-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 bg-slate-50/50 dark:bg-slate-800/50">
               <button 
                 onClick={() => {
@@ -1220,7 +1217,7 @@ export const RMAManagement = () => {
                 onClick={() => setViewingRma(null)}
                 className="py-3 bg-slate-900 dark:bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:opacity-90 transition-opacity shadow-lg shadow-blue-600/20"
               >
-                Fechar Detalhes
+                Fechar
               </button>
             </div>
           </div>
