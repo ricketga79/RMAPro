@@ -53,6 +53,13 @@ export const SupplierRMAManagement = () => {
 
   const itemsPerPage = 6;
 
+  const supplierToClientStatus: Record<string, string> = {
+    'Pendente de Envio': 'Aguarda Envio ao Fornecedor',
+    'Enviado ao Fornecedor': 'Enviado ao Fornecedor',
+    'Crédito do Fornecedor': 'Crédito do Fornecedor',
+    'Reparado/Substituído': 'Reparado/Substituído'
+  };
+
   const fetchData = async () => {
     setLoading(true);
     
@@ -432,9 +439,13 @@ export const SupplierRMAManagement = () => {
                                 resolutionNote: rma.supplierResolutionNote || ''
                               });
                             } else {
+                              const updatePayload: any = { supplier_status: newStatus };
+                              if (supplierToClientStatus[newStatus]) {
+                                updatePayload.status = supplierToClientStatus[newStatus];
+                              }
                               const { error } = await supabase
                                 .from('rmas')
-                                .update({ supplier_status: newStatus })
+                                .update(updatePayload)
                                 .eq('id', rma.id);
                               if (!error) fetchData();
                             }
@@ -808,13 +819,17 @@ export const SupplierRMAManagement = () => {
               </button>
               <button 
                 onClick={async () => {
+                  const updatePayload: any = { 
+                    supplier_status: resolutionModal.status,
+                    supplier_credit_note: resolutionModal.creditNote,
+                    supplier_resolution_note: resolutionModal.resolutionNote
+                  };
+                  if (supplierToClientStatus[resolutionModal.status]) {
+                    updatePayload.status = supplierToClientStatus[resolutionModal.status];
+                  }
                   const { error } = await supabase
                     .from('rmas')
-                    .update({ 
-                      supplier_status: resolutionModal.status,
-                      supplier_credit_note: resolutionModal.creditNote,
-                      supplier_resolution_note: resolutionModal.resolutionNote
-                    })
+                    .update(updatePayload)
                     .eq('id', resolutionModal.rmaId);
                   
                   if (!error) {
