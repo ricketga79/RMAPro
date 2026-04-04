@@ -802,30 +802,6 @@ export const RMAManagement = () => {
                         ))}
                       </select>
                     </div>
-
-                    {!(newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído') && (
-                      <div className="md:col-span-2">
-                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Estado RMA Cliente</label>
-                        <select 
-                          value={newRma.status}
-                          onChange={e => setNewRma({...newRma, status: e.target.value})}
-                          className="w-full px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
-                        >
-                          {statuses.map(s => (
-                            <option key={s.name} value={s.name}>{s.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    {(newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído') && (
-                      <div className="md:col-span-2">
-                        <div className="px-4 py-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 rounded-xl">
-                          <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400">
-                            Estado bloqueado — gerido pelo separador de Fornecedores
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -892,7 +868,7 @@ export const RMAManagement = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">N.º Série</label>
                         <input 
@@ -921,6 +897,19 @@ export const RMAManagement = () => {
                             Expirada
                           </button>
                         </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Estado RMA Cliente</label>
+                        <select 
+                          value={itemInput.repairStatus}
+                          onChange={e => setItemInput({...itemInput, repairStatus: e.target.value})}
+                          className="w-full px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
+                        >
+                          <option value="">Selecionar Estado</option>
+                          {statuses.map(s => (
+                            <option key={s.name} value={s.name}>{s.name}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
