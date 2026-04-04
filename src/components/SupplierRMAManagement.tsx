@@ -87,7 +87,6 @@ export const SupplierRMAManagement = () => {
     const { data: statusData } = await supabase
       .from('rma_statuses')
       .select('id, name, color, category')
-      .eq('category', 'supplier')
       .order('name');
 
     if (statusData) setStatuses(statusData);
@@ -117,6 +116,7 @@ export const SupplierRMAManagement = () => {
           quantity: item.quantity,
           serialNumber: item.serial_number,
           faultDescription: item.fault_description,
+          repairStatus: item.repair_status,
           warranty: item.warranty
         }))
       }));
@@ -405,7 +405,7 @@ export const SupplierRMAManagement = () => {
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2 items-center">
                         {rma.items?.map((item, idx) => (
-                          <div key={idx} className="w-full max-w-[200px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30">
+                          <div key={idx} className="w-full max-w-[240px] bg-slate-50 dark:bg-slate-800/40 rounded-lg p-2.5 border border-slate-100 dark:border-slate-800/60 shadow-sm transition-all hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900/30">
                              <div className="flex items-start justify-between gap-2 mb-1">
                                <span className="text-[11px] font-black text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight flex-1">{item.productName}</span>
                                <span className="shrink-0 text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-md font-black">x{item.quantity}</span>
@@ -419,6 +419,14 @@ export const SupplierRMAManagement = () => {
                                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">S/N</span>
                                  <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">{item.serialNumber || 'N/A'}</span>
                                </div>
+                               {item.repairStatus && (
+                                 <div className="mt-1">
+                                   <StatusBadge 
+                                     status={item.repairStatus} 
+                                     color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                                   />
+                                 </div>
+                               )}
                              </div>
                           </div>
                         ))}
@@ -452,7 +460,7 @@ export const SupplierRMAManagement = () => {
                           }}
                           className="bg-transparent font-bold text-xs focus:outline-none cursor-pointer hover:text-blue-600 transition-colors text-center"
                         >
-                          {statuses.map(s => (
+                          {statuses.filter(s => s.category === 'supplier').map(s => (
                             <option key={s.id} value={s.name}>{s.name}</option>
                           ))}
                         </select>
