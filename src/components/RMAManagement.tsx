@@ -810,19 +810,11 @@ export const RMAManagement = () => {
                                     <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{rma.odooDoc}</span>
                                   </div>
                                 )}
-                                {!rma.supplierStatus && item.repairStatus && (
+                                {item.repairStatus && (
                                   <div className="mt-1">
                                     <StatusBadge 
                                       status={item.repairStatus} 
                                       color={statuses.find(s => s.name === item.repairStatus)?.color} 
-                                    />
-                                  </div>
-                                )}
-                                {rma.supplierStatus && (
-                                  <div className="mt-1">
-                                    <StatusBadge 
-                                      status={rma.supplierStatus} 
-                                      color={statuses.find(s => s.name === rma.supplierStatus)?.color} 
                                     />
                                   </div>
                                 )}
@@ -1258,12 +1250,12 @@ export const RMAManagement = () => {
                         </span>
                       </div>
 
-                      {(viewingRma.supplierStatus || item.repairStatus) && (
+                      {item.repairStatus && (
                         <div className="flex items-center gap-2 relative z-10">
                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado:</span>
                           <StatusBadge 
-                            status={viewingRma.supplierStatus || item.repairStatus} 
-                            color={statuses.find(s => s.name === (viewingRma.supplierStatus || item.repairStatus))?.color} 
+                            status={item.repairStatus} 
+                            color={statuses.find(s => s.name === item.repairStatus)?.color} 
                           />
                         </div>
                       )}

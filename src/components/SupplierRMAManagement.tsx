@@ -123,11 +123,16 @@ export const SupplierRMAManagement = () => {
         }))
       }));
 
-      // Filter for RMAs that are explicitly active for supplier
+      // Filter items that are in any supplier process stage
+      const supplierCategoryStatuses = (statusData || [])
+        .filter((s: any) => s.category === 'supplier')
+        .map((s: any) => s.name as string);
+      const supplierProcessStatuses = ['Aguarda Envio ao Fornecedor', ...supplierCategoryStatuses];
+
       const allSupplierRmas = mapped
         .map(rma => ({
           ...rma,
-          items: rma.items?.filter(item => item.repairStatus === 'Aguarda Envio ao Fornecedor') || []
+          items: rma.items?.filter(item => supplierProcessStatuses.includes(item.repairStatus || '')) || []
         }))
         .filter(rma => rma.items.length > 0);
       setRmas(allSupplierRmas);
@@ -237,7 +242,6 @@ export const SupplierRMAManagement = () => {
       customer_id: newRma.customerId,
       supplier_id: newRma.supplierId || null,
       status: newRma.status,
-      supplier_status: newRma.supplierStatus,
       odoo_doc: newRma.odooDoc?.trim(),
       updated_at: new Date().toISOString()
     };
@@ -249,10 +253,22 @@ export const SupplierRMAManagement = () => {
 
     if (error) {
       setErrorMsg(error.message);
-    } else {
-      setIsModalOpen(false);
-      fetchData();
+      setIsSubmitting(false);
+      return;
     }
+
+    // Update each item's repair_status independently
+    for (const item of newRma.items || []) {
+      if (item.id) {
+        await supabase
+          .from('rma_items')
+          .update({ repair_status: item.repairStatus || null })
+          .eq('id', item.id);
+      }
+    }
+
+    setIsModalOpen(false);
+    fetchData();
     setIsSubmitting(false);
   };
 
@@ -267,10 +283,11 @@ export const SupplierRMAManagement = () => {
       rma.odooDoc?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (rma.seqNumber && `RMA#${rma.seqNumber}`.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    const FINAL_SUPPLIER_STATUSES = ['Crédito do Fornecedor', 'Reparado/Substituído'];
     const matchesTab = 
       activeFilter === 'all' || 
-      (activeFilter === 'open' && rma.supplierStatus !== 'Crédito do Fornecedor' && rma.supplierStatus !== 'Reparado/Substituído') || 
-      (activeFilter === 'completed' && (rma.supplierStatus === 'Crédito do Fornecedor' || rma.supplierStatus === 'Reparado/Substituído'));
+      (activeFilter === 'open' && rma.items?.some(item => !FINAL_SUPPLIER_STATUSES.includes(item.repairStatus || ''))) || 
+      (activeFilter === 'completed' && rma.items?.every(item => FINAL_SUPPLIER_STATUSES.includes(item.repairStatus || '')));
 
     return matchesSearch && matchesTab;
   });
@@ -742,7 +759,7 @@ export const SupplierRMAManagement = () => {
                   </select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Documento Odoo</label>
                   <input 
                     type="text"
@@ -752,47 +769,52 @@ export const SupplierRMAManagement = () => {
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono font-bold"
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Estado Fornecedor</label>
-                  <select 
-                    value={newRma.supplierStatus}
-                    onChange={e => setNewRma({...newRma, supplierStatus: e.target.value})}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-bold"
-                  >
-                    {statuses.filter(s => s.category === 'supplier').map(s => (
-                      <option key={s.id} value={s.name}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Package size={18} className="text-slate-400" />
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Itens do Processo</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos do Processo</h4>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden divide-y divide-slate-100 dark:divide-slate-800">
                   {newRma.items?.map((item, idx) => (
-                    <div key={idx} className="p-4 flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-slate-900 dark:text-white">{item.productName}</span>
-                        <span className="text-[10px] font-mono text-blue-500 font-bold">{item.productReference}</span>
+                    <div key={idx} className="p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-900 dark:text-white">{item.productName}</span>
+                          <span className="text-[10px] font-mono text-blue-500 font-bold">{item.productReference}</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-[10px] font-black text-slate-400 uppercase block">Qtd</span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">{item.quantity}</span>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] font-black text-slate-400 uppercase block">Série</span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">{item.serialNumber || '---'}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase block">Qtd</span>
-                          <span className="text-sm font-bold text-slate-900 dark:text-white">{item.quantity}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase block">Série</span>
-                          <span className="text-sm font-bold text-slate-900 dark:text-white">{item.serialNumber || '---'}</span>
-                        </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-orange-500">Estado do Artigo</label>
+                        <select
+                          value={item.repairStatus || ''}
+                          onChange={e => {
+                            const updated = [...(newRma.items || [])];
+                            updated[idx] = { ...updated[idx], repairStatus: e.target.value };
+                            setNewRma({ ...newRma, items: updated });
+                          }}
+                          className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-orange-200 dark:border-orange-800/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500/20 text-orange-700 dark:text-orange-400 font-bold transition-all"
+                        >
+                          <option value="Aguarda Envio ao Fornecedor">Aguarda Envio ao Fornecedor</option>
+                          {statuses.filter(s => s.category === 'supplier').map(s => (
+                            <option key={s.id} value={s.name}>{s.name}</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-400 italic text-center">Para alterar os itens do processo, utilize a Gestão RMA Cliente.</p>
               </div>
             </form>
 
