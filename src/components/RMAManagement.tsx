@@ -1091,11 +1091,11 @@ export const RMAManagement = () => {
                               </div>
                             </div>
 
-                            {rma.supplierStatus ? (
+                            {newRma.supplierStatus ? (
                               <div className="mb-2">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado Fornecedor</label>
                                 <div className="px-3 py-2 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800/50 rounded-lg">
-                                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{rma.supplierStatus}</span>
+                                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{newRma.supplierStatus}</span>
                                 </div>
                               </div>
                             ) : (
