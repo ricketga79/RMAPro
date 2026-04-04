@@ -296,6 +296,7 @@ export const RMAManagement = () => {
       customerId: rma.customerId,
       supplierId: rma.supplierId || '',
       status: rma.status,
+      supplierStatus: rma.supplierStatus,
       odooDoc: rma.odooDoc || '',
       items: rma.items?.map(i => ({
         productId: i.productId,
@@ -833,12 +834,22 @@ export const RMAManagement = () => {
                       <select 
                         value={newRma.status}
                         onChange={e => setNewRma({...newRma, status: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
+                        disabled={newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído'}
+                        className={`w-full px-4 py-2.5 border rounded-xl text-sm outline-none transition-all font-bold ${
+                          newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído'
+                            ? 'bg-slate-100 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed opacity-60'
+                            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 focus:ring-2 focus:ring-blue-500/50'
+                        }`}
                       >
                         {statuses.map(s => (
                           <option key={s.name} value={s.name}>{s.name}</option>
                         ))}
                       </select>
+                      {(newRma.supplierStatus === 'Crédito do Fornecedor' || newRma.supplierStatus === 'Reparado/Substituído') && (
+                        <p className="mt-1.5 text-[10px] font-bold text-amber-500 flex items-center gap-1">
+                          Bloqueado — estado gerido pelo separador de Fornecedores
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
