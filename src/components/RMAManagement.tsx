@@ -1262,7 +1262,7 @@ export const RMAManagement = () => {
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 bg-slate-50/50 dark:bg-slate-800/50">
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-3 bg-slate-50/50 dark:bg-slate-800/50">
               <button 
                 onClick={() => {
                   setViewingRma(null);
@@ -1271,7 +1271,16 @@ export const RMAManagement = () => {
                 className="flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
                 <Edit2 size={16} />
-                Editar Artigo
+                Editar
+              </button>
+              <button 
+                onClick={() => {
+                  handleDeleteSingleItem(viewingRma, viewingItemIndex ?? 0);
+                }}
+                className="flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 text-rose-500 dark:text-rose-400 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all shadow-sm"
+              >
+                <Trash2 size={16} />
+                Eliminar
               </button>
               <button 
                 onClick={() => setViewingRma(null)}
