@@ -435,6 +435,14 @@ export const RMAManagement = () => {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    const payload: any = {
+      customer_id: newRma.customerId,
+      supplier_id: newRma.supplierId || null,
+      status: newRma.status,
+      odoo_doc: newRma.odooDoc.trim(),
+      updated_at: new Date().toISOString()
+    };
+
     console.log('[DEBUG] handleSaveRma - newRma:', newRma);
     console.log('[DEBUG] handleSaveRma - isEditingSingleItem:', isEditingSingleItem);
     console.log('[DEBUG] handleSaveRma - payload:', payload);
