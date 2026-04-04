@@ -543,42 +543,10 @@ export const SupplierRMAManagement = () => {
                 </div>
                 <div className="space-y-1">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado Fornecedor</span>
-                  <div className="flex items-center gap-2">
-                    <select 
-                      value={viewingRma.supplierStatus || 'Pendente de Envio'}
-                      onChange={async (e) => {
-                        const newStatus = e.target.value;
-                        if (newStatus === 'Crédito do Fornecedor' || newStatus === 'Reparado/Substituído') {
-                          setResolutionModal({
-                            isOpen: true,
-                            rmaId: viewingRma.id,
-                            status: newStatus,
-                            creditNote: viewingRma.supplierCreditNote || '',
-                            resolutionNote: viewingRma.supplierResolutionNote || ''
-                          });
-                        } else {
-                          const updatePayload: any = { supplier_status: newStatus };
-                          if (supplierToClientStatus[newStatus]) {
-                            updatePayload.status = supplierToClientStatus[newStatus];
-                          }
-                          const { error } = await supabase
-                            .from('rmas')
-                            .update(updatePayload)
-                            .eq('id', viewingRma.id);
-                          if (!error) fetchData();
-                        }
-                      }}
-                      className="bg-transparent font-bold text-xs focus:outline-none cursor-pointer text-blue-600"
-                    >
-                      {statuses.filter(s => s.category === 'supplier').map(s => (
-                        <option key={s.id} value={s.name}>{s.name}</option>
-                      ))}
-                    </select>
-                    <StatusBadge 
-                      status={viewingRma.supplierStatus || ''} 
-                      color={statuses.find(s => s.name === viewingRma.supplierStatus)?.color} 
-                    />
-                  </div>
+                  <StatusBadge 
+                    status={viewingRma.supplierStatus || 'Pendente de Envio'} 
+                    color={statuses.find(s => s.name === viewingRma.supplierStatus)?.color} 
+                  />
                 </div>
               </div>
 
