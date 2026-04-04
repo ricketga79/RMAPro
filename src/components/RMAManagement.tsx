@@ -653,7 +653,6 @@ export const RMAManagement = () => {
                   <th className="px-6 py-4 text-center">RMA</th>
                   <th className="px-6 py-4 text-center">CLIENTE</th>
                   <th className="px-6 py-4 text-center">ARTIGO</th>
-                  <th className="px-6 py-4 text-center">DOC. ODOO</th>
                   <th className="px-6 py-4 text-center">AÇÕES</th>
                 </tr>
               </thead>
@@ -690,30 +689,33 @@ export const RMAManagement = () => {
                                  </span>
                                </div>
                              </div>
-                             <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800/60 pt-1 mt-1 text-left">
-                               <div className="flex items-center gap-1.5">
-                                 <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">REF</span>
-                                 <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{item.productReference}</span>
-                               </div>
-                               <div className="flex items-center gap-1.5">
-                                 <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">S/N</span>
-                                 <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">{item.serialNumber || 'N/A'}</span>
-                               </div>
-                               {item.repairStatus && (
-                                 <div className="mt-1">
-                                   <StatusBadge 
-                                     status={item.repairStatus} 
-                                     color={statuses.find(s => s.name === item.repairStatus)?.color} 
-                                   />
-                                 </div>
-                               )}
-                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                       <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{rma.odooDoc || 'N/A'}</span>
+                              <div className="flex flex-col gap-1 border-t border-slate-100 dark:border-slate-800/60 pt-1 mt-1 text-left">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">REF</span>
+                                  <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{item.productReference}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">S/N</span>
+                                  <span className="text-[10px] text-slate-600 dark:text-slate-400 font-mono font-medium">{item.serialNumber || 'N/A'}</span>
+                                </div>
+                                {rma.odooDoc && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400">DOC</span>
+                                    <span className="text-[10px] text-blue-500 dark:text-blue-400 font-mono font-bold">{rma.odooDoc}</span>
+                                  </div>
+                                )}
+                                {item.repairStatus && (
+                                  <div className="mt-1">
+                                    <StatusBadge 
+                                      status={item.repairStatus} 
+                                      color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                           </div>
+                         ))}
+                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-center gap-2">
