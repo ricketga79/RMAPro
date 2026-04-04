@@ -760,7 +760,7 @@ export const SupplierRMAManagement = () => {
                     onChange={e => setNewRma({...newRma, supplierStatus: e.target.value})}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-bold"
                   >
-                    {statuses.map(s => (
+                    {statuses.filter(s => s.category === 'supplier').map(s => (
                       <option key={s.id} value={s.name}>{s.name}</option>
                     ))}
                   </select>
