@@ -493,18 +493,17 @@ export const RMAManagement = () => {
     if (!error && rmaId) {
       if (isEditingSingleItem && editingId) {
         const editedItem = newRma.items[0];
-        const otherItems = originalRmaItems.filter(i => i.id !== editedItem.id);
-        const allItems = [...otherItems, {
-          rma_id: rmaId,
-          product_id: editedItem.productId,
-          quantity: editedItem.quantity,
-          serial_number: editedItem.serialNumber?.trim(),
-          fault_description: editedItem.faultDescription?.trim(),
-          repair_status: editedItem.repairStatus || null,
-          warranty: editedItem.warranty
-        }];
-
-        const { error: itemsError } = await supabase.from('rma_items').upsert(allItems);
+        const { error: itemsError } = await supabase
+          .from('rma_items')
+          .update({
+            product_id: editedItem.productId,
+            quantity: editedItem.quantity,
+            serial_number: editedItem.serialNumber?.trim(),
+            fault_description: editedItem.faultDescription?.trim(),
+            repair_status: editedItem.repairStatus || null,
+            warranty: editedItem.warranty
+          })
+          .eq('id', editedItem.id);
         error = itemsError;
       } else {
         if (editingId) {
