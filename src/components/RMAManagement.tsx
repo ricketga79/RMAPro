@@ -818,6 +818,14 @@ export const RMAManagement = () => {
                                     />
                                   </div>
                                 )}
+                                {rma.supplierStatus && (
+                                  <div className="mt-1">
+                                    <StatusBadge 
+                                      status={rma.supplierStatus} 
+                                      color={statuses.find(s => s.name === rma.supplierStatus)?.color} 
+                                    />
+                                  </div>
+                                )}
                               </div>
                            </div>
                          ))}
