@@ -707,7 +707,6 @@ export const RMAManagement = () => {
                   <th className="px-6 py-4 text-center">RMA</th>
                   <th className="px-6 py-4 text-center">CLIENTE</th>
                   <th className="px-6 py-4 text-center">ARTIGO</th>
-                  <th className="px-6 py-4 text-center">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -773,36 +772,8 @@ export const RMAManagement = () => {
                               </div>
                            </div>
                          ))}
-                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center gap-2">
-                        <button 
-                          onClick={() => setViewingRma(rma)}
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                          title="Visualização Rápida"
-                        >
-                          <Eye size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleEditClick(rma)}
-                          className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                          title="Editar RMA"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteRma(rma.id)}
-                          className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
-                          title="Eliminar RMA"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                        <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-                          <ChevronRight size={16} />
-                        </button>
-                      </div>
-                    </td>
+                        </div>
+                     </td>
                   </tr>
                 ))}
               </tbody>
