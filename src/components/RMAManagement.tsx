@@ -360,12 +360,15 @@ export const RMAManagement = () => {
 
     console.log('[DEBUG] handleSaveRma - payload:', payload);
 
-    // Trigger for Supplier RMA
-    if (newRma.status === 'Aguarda Envio ao Fornecedor') {
+    const hasSupplierStatus = newRma.items.some(item => item.repairStatus === 'Aguarda Envio ao Fornecedor');
+
+    if (hasSupplierStatus || newRma.status === 'Aguarda Envio ao Fornecedor') {
       payload.is_supplier_active = true;
-      if (!editingId) {
+      if (!editingId || !newRma.supplierStatus) {
         payload.supplier_status = 'Pendente de Envio';
       }
+    } else if (editingId) {
+      payload.is_supplier_active = false;
     }
 
     // Automation for "Substituido Stock"
