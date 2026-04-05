@@ -558,13 +558,6 @@ export const SupplierRMAManagement = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Doc. Odoo</span>
                   <p className="text-sm font-mono text-blue-500 font-bold">{viewingRma.odooDoc || '---'}</p>
                 </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado Fornecedor</span>
-                  <StatusBadge 
-                    status={viewingRma.supplierStatus || 'Pendente de Envio'} 
-                    color={statuses.find(s => s.name === viewingRma.supplierStatus)?.color} 
-                  />
-                </div>
               </div>
 
               {(viewingRma.supplierCreditNote || viewingRma.supplierResolutionNote) && (
