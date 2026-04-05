@@ -42,6 +42,7 @@ export const RMAManagement = () => {
     status: '',
     odooDoc: '',
     items: [] as { 
+        id?: string,
         productId: string, 
         productName: string, 
         productReference: string, 
@@ -50,7 +51,9 @@ export const RMAManagement = () => {
         faultDescription: string, 
         repairDescription?: string,
         repairStatus?: string,
-        warranty: 'Ativa' | 'Expirada' 
+        warranty: 'Ativa' | 'Expirada',
+        supplierId?: string,
+        supplierName?: string
       }[]
   });
 
@@ -61,7 +64,8 @@ export const RMAManagement = () => {
     faultDescription: '',
     repairDescription: '',
     repairStatus: '',
-    warranty: 'Ativa' as 'Ativa' | 'Expirada'
+    warranty: 'Ativa' as 'Ativa' | 'Expirada',
+    supplierId: ''
   });
 
   const fetchData = async () => {
@@ -277,7 +281,7 @@ export const RMAManagement = () => {
       supplierId: '',
       status: statuses.length > 0 ? statuses[0].name : '',
       odooDoc: '',
-      items: []
+      items: [] as any[]
     });
     setItemInput({
       productRef: '',
@@ -286,7 +290,8 @@ export const RMAManagement = () => {
       faultDescription: '',
       repairDescription: '',
       repairStatus: '',
-      warranty: 'Ativa'
+      warranty: 'Ativa',
+      supplierId: ''
     });
     setProductRefInput('');
     setFoundProduct(null);
@@ -300,7 +305,6 @@ export const RMAManagement = () => {
       customerId: rma.customerId,
       supplierId: rma.supplierId || '',
       status: rma.status,
-      supplierStatus: rma.supplierStatus,
       odooDoc: rma.odooDoc || '',
       items: rma.items?.map(i => ({
         productId: i.productId,
@@ -311,7 +315,9 @@ export const RMAManagement = () => {
         faultDescription: i.faultDescription || '',
         repairDescription: i.repairDescription || '',
         repairStatus: i.repairStatus || '',
-        warranty: i.warranty
+        warranty: i.warranty,
+        supplierId: i.supplierId || rma.supplierId || '',
+        supplierName: i.supplierName || rma.supplierName || ''
       })) || []
     });
     
@@ -322,7 +328,8 @@ export const RMAManagement = () => {
       faultDescription: '',
       repairDescription: '',
       repairStatus: '',
-      warranty: 'Ativa'
+      warranty: 'Ativa',
+      supplierId: ''
     });
     setProductRefInput('');
     setFoundProduct(null);
@@ -354,7 +361,6 @@ export const RMAManagement = () => {
       customerId: rma.customerId,
       supplierId: rma.supplierId || '',
       status: rma.status,
-      supplierStatus: rma.supplierStatus,
       odooDoc: rma.odooDoc || '',
       items: [{
         id: item.id,
@@ -366,7 +372,9 @@ export const RMAManagement = () => {
         faultDescription: item.faultDescription || '',
         repairDescription: item.repairDescription || '',
         repairStatus: item.repairStatus || '',
-        warranty: item.warranty
+        warranty: item.warranty,
+        supplierId: item.supplierId || rma.supplierId || '',
+        supplierName: item.supplierName || rma.supplierName || ''
       }]
     });
     
@@ -377,7 +385,8 @@ export const RMAManagement = () => {
       faultDescription: '',
       repairDescription: '',
       repairStatus: '',
-      warranty: 'Ativa'
+      warranty: 'Ativa',
+      supplierId: ''
     });
     setProductRefInput('');
     setFoundProduct(null);
@@ -501,9 +510,10 @@ export const RMAManagement = () => {
             serial_number: editedItem.serialNumber?.trim(),
             fault_description: editedItem.faultDescription?.trim(),
             repair_status: editedItem.repairStatus || null,
-            warranty: editedItem.warranty
+            warranty: editedItem.warranty,
+            supplier_id: editedItem.supplierId || null
           })
-          .eq('id', editedItem.id);
+          .eq('id', (editedItem as any).id);
         error = itemsError;
       } else {
         if (editingId) {
@@ -517,7 +527,8 @@ export const RMAManagement = () => {
           serial_number: item.serialNumber.trim(),
           fault_description: item.faultDescription?.trim(),
           repair_status: item.repairStatus || null,
-          warranty: item.warranty
+          warranty: item.warranty,
+          supplier_id: item.supplierId || null
         }));
 
         const { error: itemsError } = await supabase.from('rma_items').insert(itemsPayload);
@@ -565,7 +576,8 @@ export const RMAManagement = () => {
             serial_number: item.serialNumber,
             fault_description: item.faultDescription,
             repair_status: item.repairStatus || null,
-            warranty: item.warranty
+            warranty: item.warranty,
+            supplier_id: item.supplierId || null
           }));
           if (itemsPayload) await supabase.from('rma_items').insert(itemsPayload);
         }
@@ -594,7 +606,9 @@ export const RMAManagement = () => {
           faultDescription: itemInput.faultDescription,
           repairDescription: itemInput.repairDescription,
           repairStatus: itemInput.repairStatus as any,
-          warranty: itemInput.warranty
+          warranty: itemInput.warranty,
+          supplierId: itemInput.supplierId,
+          supplierName: suppliers.find(s => s.id === itemInput.supplierId)?.name
         }
       ]
     }));
@@ -607,7 +621,8 @@ export const RMAManagement = () => {
       faultDescription: '',
       repairDescription: '',
       repairStatus: '',
-      warranty: 'Ativa'
+      warranty: 'Ativa',
+      supplierId: ''
     });
     setProductRefInput('');
     setFoundProduct(null);
@@ -647,6 +662,14 @@ export const RMAManagement = () => {
     setProductRefInput(product.reference || '');
     setShowSuggestions(false);
     setFilteredProducts([]);
+    
+    // Auto-select supplier if the product has a default one
+    if (product.supplierId) {
+      setItemInput(prev => ({
+        ...prev,
+        supplierId: product.supplierId || ''
+      }));
+    }
   };
 
   return (
@@ -865,6 +888,7 @@ export const RMAManagement = () => {
                   </div>
                 )}
 
+                {/* Section 1: Informação Geral */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
@@ -872,30 +896,17 @@ export const RMAManagement = () => {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
+                    <div className="md:col-span-1">
                       <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Cliente *</label>
                       <select 
                         required
                         value={newRma.customerId}
                         onChange={e => setNewRma({...newRma, customerId: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all"
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all appearance-none cursor-pointer"
                       >
                         <option value="">Selecionar Cliente</option>
                         {customers.map(c => (
                           <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Fornecedor</label>
-                      <select 
-                        value={newRma.supplierId}
-                        onChange={e => setNewRma({...newRma, supplierId: e.target.value})}
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all"
-                      >
-                        <option value="">Selecionar Fornecedor</option>
-                        {suppliers.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
                         ))}
                       </select>
                     </div>
@@ -914,271 +925,265 @@ export const RMAManagement = () => {
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
 
-                {/* Section 2: Item Addition */}
+                {/* Section 2: Adicionar Artigo */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                    <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Adicionar Artigo</h4>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos no RMA</h4>
+                    </div>
+                    {!isAddingItem && (
+                      <button 
+                        type="button"
+                        onClick={() => setIsAddingItem(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest transition-all shadow-md shadow-emerald-500/20 transform hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <Plus size={14} />
+                        Adicionar Artigo
+                      </button>
+                    )}
                   </div>
 
-                  <div className="p-5 bg-emerald-50/30 dark:bg-emerald-900/5 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 space-y-4 shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-2 relative">
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Referência / Artigo *</label>
-                        <div className="relative">
-                          <input 
-                            type="text" 
-                            value={productRefInput}
-                            onChange={e => handleRefChange(e.target.value)}
-                            onFocus={() => { if (filteredProducts.length > 0) setShowSuggestions(true); }}
-                            placeholder="Pesquisar REF ou Nome..."
-                            className={`w-full px-4 py-2.5 bg-white dark:bg-slate-900 border ${foundProduct ? 'border-emerald-500 shadow-sm shadow-emerald-500/10' : 'border-slate-200 dark:border-slate-700'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white font-mono transition-all`}
-                          />
-                          {showSuggestions && filteredProducts.length > 0 && (
-                            <div className="absolute left-0 right-0 top-full mt-2 z-[70] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                              {filteredProducts.map(p => (
-                                <button
-                                  key={p.id}
-                                  type="button"
-                                  onClick={() => handleSelectProduct(p)}
-                                  className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border-b last:border-0 border-slate-50 dark:border-slate-800 group"
-                                >
-                                  <p className="text-xs font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-blue-600 transition-colors">{p.name}</p>
-                                  <p className="text-[10px] font-mono text-blue-500 font-bold">{p.reference}</p>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                          {foundProduct && (
-                            <div className="absolute right-3 top-[38px] text-emerald-500">
-                              <CheckCircle2 size={16} />
-                            </div>
-                          )}
-                        </div>
-                        {foundProduct && (
-                          <div className="mt-2 flex items-center gap-2 px-2 py-1 bg-white/50 dark:bg-slate-900/50 rounded-lg">
-                            <Package size={12} className="text-emerald-500" />
-                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight line-clamp-1">{foundProduct.name}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Quantidade</label>
-                        <input 
-                          type="number" 
-                          min="1"
-                          value={itemInput.quantity}
-                          onChange={e => setItemInput({...itemInput, quantity: parseInt(e.target.value) || 1})}
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">N.º Série</label>
-                        <input 
-                          type="text" 
-                          value={itemInput.serialNumber}
-                          onChange={e => setItemInput({...itemInput, serialNumber: e.target.value})}
-                          placeholder="Ex: SN-123456"
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white font-mono transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Garantia</label>
-                        <div className="flex bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-700 gap-1 h-[42px]">
-                          <button 
-                            type="button"
-                            onClick={() => setItemInput({...itemInput, warranty: 'Ativa'})}
-                            className={`flex-1 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${itemInput.warranty === 'Ativa' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-slate-600'}`}
-                          >
-                            Ativa
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => setItemInput({...itemInput, warranty: 'Expirada'})}
-                            className={`flex-1 py-1 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${itemInput.warranty === 'Expirada' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-slate-400 hover:text-slate-600'}`}
-                          >
-                            Expirada
-                          </button>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Estado RMA Cliente</label>
-                        <select 
-                          value={itemInput.repairStatus}
-                          onChange={e => setItemInput({...itemInput, repairStatus: e.target.value})}
-                          className="w-full px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
-                        >
-                          <option value="">Selecionar Estado</option>
-                          {statuses.map(s => (
-                            <option key={s.name} value={s.name}>{s.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Fornecedor</label>
-                        <select 
-                          value={newRma.supplierId}
-                          onChange={e => setNewRma({...newRma, supplierId: e.target.value})}
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white transition-all"
-                        >
-                          <option value="">Selecionar Fornecedor</option>
-                          {suppliers.map(s => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Doc. Odoo</label>
-                        <input 
-                          type="text" 
-                          value={newRma.odooDoc}
-                          onChange={e => setNewRma({...newRma, odooDoc: e.target.value})}
-                          placeholder="Ex: INV/2024/001"
-                          className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white font-mono transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Descrição Avaria</label>
-                      <textarea 
-                        value={itemInput.faultDescription}
-                        onChange={e => setItemInput({...itemInput, faultDescription: e.target.value})}
-                        placeholder="Descreva o problema..."
-                        rows={3}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 dark:text-white resize-none transition-all"
-                      />
-                    </div>
-
-                    <button 
-                      type="button"
-                      onClick={handleAddItem}
-                      disabled={!foundProduct}
-                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
-                    >
-                      <Plus size={16} />
-                      Adicionar Artigo à Lista
-                    </button>
-                  </div>
-                </div>
-
-                {/* Section 3: Added Items List */}
-                {newRma.items.length > 0 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1 h-4 bg-orange-500 rounded-full"></div>
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Artigos no RMA ({newRma.items.length})</h4>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                      {newRma.items.map((item, idx) => (
-                        <div key={idx} className="flex items-start justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:border-blue-200 dark:hover:border-blue-900 transition-all group">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-[10px] bg-slate-900 dark:bg-slate-700 text-white px-2 py-0.5 rounded-full font-black">#{idx + 1}</span>
-                              <span className="text-sm font-bold text-slate-900 dark:text-white underline decoration-slate-200 dark:decoration-slate-700 underline-offset-4">{item.productName}</span>
-                              <span className="text-[10px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-800/50 font-black">x{item.quantity}</span>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] mb-2 font-medium">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-slate-400 font-mono">REF:</span>
-                                <span className="text-blue-500 font-mono font-bold tracking-tight">{item.productReference}</span>
-                              </div>
-                              {item.serialNumber && (
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-slate-400 font-mono">SN:</span>
-                                  <span className="text-slate-700 dark:text-slate-300 font-mono font-bold">{item.serialNumber}</span>
-                                </div>
-                              )}
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-slate-400 font-mono">WTY:</span>
-                                <span className={`font-black uppercase tracking-widest ${item.warranty === 'Ativa' ? 'text-emerald-500' : 'text-rose-500'}`}>{item.warranty}</span>
-                              </div>
-                            </div>
-
-                            {newRma.supplierStatus ? (
-                              <div className="mb-2">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado Fornecedor</label>
-                                <div className="px-3 py-2 bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-800/50 rounded-lg">
-                                  <span className="text-xs font-bold text-orange-600 dark:text-orange-400">{newRma.supplierStatus}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="mb-2">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado RMA Cliente</label>
-                                <select 
-                                  value={item.repairStatus || ''}
-                                  onChange={e => {
-                                    const updated = [...newRma.items];
-                                    updated[idx] = { ...updated[idx], repairStatus: e.target.value };
-                                    setNewRma({ ...newRma, items: updated });
-                                  }}
-                                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all"
-                                >
-                                  <option value="">Selecionar Estado</option>
-                                  {statuses.map(s => (
-                                    <option key={s.name} value={s.name}>{s.name}</option>
-                                  ))}
-                                </select>
+                  {isAddingItem ? (
+                    <div className="p-5 bg-emerald-50/20 dark:bg-emerald-900/5 rounded-2xl border-2 border-emerald-500/10 dark:border-emerald-500/5 space-y-4 animate-in slide-in-from-top-4 duration-300 shadow-inner">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="md:col-span-2 relative">
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Referência / Artigo *</label>
+                          <div className="relative">
+                            <input 
+                              type="text" 
+                              value={productRefInput}
+                              onChange={e => handleRefChange(e.target.value)}
+                              onFocus={() => { if (filteredProducts.length > 0) setShowSuggestions(true); }}
+                              placeholder="Pesquisar por REF ou Nome..."
+                              className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-emerald-500/20 dark:border-emerald-500/10 rounded-xl text-sm outline-none focus:border-emerald-500 dark:text-white font-mono transition-all"
+                            />
+                            {showSuggestions && filteredProducts.length > 0 && (
+                              <div className="absolute left-0 right-0 top-full mt-2 z-[70] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                {filteredProducts.map(p => (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => handleSelectProduct(p)}
+                                    className="w-full text-left px-4 py-3 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b last:border-0 border-slate-50 dark:border-slate-800 group"
+                                  >
+                                    <p className="text-xs font-bold text-slate-900 dark:text-white mb-0.5 group-hover:text-emerald-600 transition-colors">{p.name}</p>
+                                    <p className="text-[10px] font-mono text-emerald-500 font-bold">{p.reference}</p>
+                                  </button>
+                                ))}
                               </div>
                             )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Quantidade</label>
+                          <input 
+                            type="number" 
+                            min="1"
+                            value={itemInput.quantity}
+                            onChange={e => setItemInput({...itemInput, quantity: parseInt(e.target.value) || 1})}
+                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-emerald-500/20 dark:border-emerald-500/10 rounded-xl text-sm outline-none focus:border-emerald-500 dark:text-white transition-all font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">N.º Série</label>
+                          <input 
+                            type="text" 
+                            value={itemInput.serialNumber}
+                            onChange={e => setItemInput({...itemInput, serialNumber: e.target.value})}
+                            placeholder="Ex: SN-123456"
+                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-emerald-500/20 dark:border-emerald-500/10 rounded-xl text-sm outline-none focus:border-emerald-500 dark:text-white font-mono transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Fornecedor *</label>
+                          <select 
+                            value={itemInput.supplierId}
+                            onChange={e => setItemInput({...itemInput, supplierId: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-emerald-500/20 dark:border-emerald-500/10 rounded-xl text-sm outline-none focus:border-emerald-500 dark:text-white transition-all appearance-none cursor-pointer"
+                          >
+                            <option value="">Selecionar Fornecedor</option>
+                            {suppliers.map(s => (
+                              <option key={s.id} value={s.id}>{s.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Garantia</label>
+                          <div className="flex bg-white dark:bg-slate-900 p-1 rounded-xl border-2 border-emerald-500/20 dark:border-emerald-500/10 gap-1 h-[42px]">
+                            <button 
+                              type="button"
+                              onClick={() => setItemInput({...itemInput, warranty: 'Ativa'})}
+                              className={`flex-1 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${itemInput.warranty === 'Ativa' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'text-slate-400'}`}
+                            >
+                              Ativa
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setItemInput({...itemInput, warranty: 'Expirada'})}
+                              className={`flex-1 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg transition-all ${itemInput.warranty === 'Expirada' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'text-slate-400'}`}
+                            >
+                              Expirada
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1.5 font-mono">Descrição Avaria</label>
+                          <textarea 
+                            value={itemInput.faultDescription}
+                            onChange={e => setItemInput({...itemInput, faultDescription: e.target.value})}
+                            placeholder="Descreva o problema..."
+                            rows={3}
+                            className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-emerald-500/20 dark:border-emerald-500/10 rounded-xl text-sm outline-none focus:border-emerald-500 dark:text-white resize-none transition-all placeholder:text-slate-400"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => setIsAddingItem(false)}
+                            className="flex-1 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-500 font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-slate-100 transition-all"
+                          >
+                            Cancelar
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => { handleAddItem(); setIsAddingItem(false); }}
+                            disabled={!foundProduct || !itemInput.supplierId}
+                            className="flex-[2] py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all disabled:opacity-30 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+                          >
+                            <Plus size={16} />
+                            Adicionar à Lista
+                          </button>
+                        </div>
+                        {!itemInput.supplierId && foundProduct && (
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold animate-pulse text-center">* Por favor, selecione um fornecedor para este artigo</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    newRma.items.length === 0 && (
+                      <div className="py-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center text-slate-400 space-y-2 bg-slate-50/50 dark:bg-slate-900/20">
+                        <Package size={32} className="opacity-20" />
+                        <p className="text-xs font-medium tracking-wide">Nenhum artigo adicionado</p>
+                        <button 
+                          type="button"
+                          onClick={() => setIsAddingItem(true)}
+                          className="mt-2 text-emerald-500 hover:text-emerald-600 font-black text-[10px] uppercase tracking-widest flex items-center gap-2"
+                        >
+                          <Plus size={14} />
+                          Clique para adicionar
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+
+                  {/* Added Items List */}
+                  {newRma.items.length > 0 && (
+                    <div className="grid grid-cols-1 gap-3 max-h-[350px] overflow-y-auto pr-3 custom-scrollbar pt-2">
+                      {newRma.items.map((item, idx) => (
+                        <div key={idx} className="flex items-start justify-between p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm hover:border-emerald-500/30 dark:hover:border-emerald-500/20 transition-all group relative overflow-hidden">
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 opacity-30"></div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-[10px] bg-slate-900 dark:bg-slate-700 text-white px-2 py-0.5 rounded-md font-black">#{idx + 1}</span>
+                              <span className="text-sm font-bold text-slate-900 dark:text-white leading-tight">{item.productName}</span>
+                              <div className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/50 rounded-lg shrink-0">
+                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-black">x{item.quantity}</span>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[10px] mb-3">
+                              <div className="space-y-0.5">
+                                <span className="text-slate-400 font-bold uppercase tracking-tighter">Referência</span>
+                                <p className="text-blue-500 font-mono font-bold leading-none">{item.productReference}</p>
+                              </div>
+                              <div className="space-y-0.5">
+                                <span className="text-slate-400 font-bold uppercase tracking-tighter">Fornecedor</span>
+                                <p className="text-emerald-600 dark:text-emerald-400 font-bold leading-none">{item.supplierName || 'N/D'}</p>
+                              </div>
+                              <div className="space-y-0.5">
+                                <span className="text-slate-400 font-bold uppercase tracking-tighter">Garantia</span>
+                                <p className={`font-black uppercase leading-none ${item.warranty === 'Ativa' ? 'text-emerald-500' : 'text-rose-500'}`}>{item.warranty}</p>
+                              </div>
+                              {item.serialNumber && (
+                                <div className="space-y-0.5">
+                                  <span className="text-slate-400 font-bold uppercase tracking-tighter">S/N</span>
+                                  <p className="text-slate-700 dark:text-slate-300 font-mono leading-none">{item.serialNumber}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="mb-3">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Estado RMA Cliente</label>
+                              <select 
+                                value={item.repairStatus || ''}
+                                onChange={e => {
+                                  const updated = [...newRma.items];
+                                  updated[idx] = { ...updated[idx], repairStatus: e.target.value };
+                                  setNewRma({ ...newRma, items: updated });
+                                }}
+                                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500/50 text-blue-700 dark:text-blue-400 font-bold transition-all cursor-pointer"
+                              >
+                                <option value="">Selecionar Estado</option>
+                                {statuses.map(s => (
+                                  <option key={s.name} value={s.name}>{s.name}</option>
+                                ))}
+                              </select>
+                            </div>
                             
                             {item.faultDescription && (
-                              <div className="space-y-2 pt-2 border-t border-slate-50 dark:border-slate-800">
-                                <div className="flex gap-2">
-                                  <span className="text-[9px] font-black text-amber-500 uppercase tracking-tighter shrink-0 pt-0.5">AVARIA:</span>
-                                  <p className="text-[10px] text-slate-500 italic line-clamp-2">{item.faultDescription}</p>
-                                </div>
+                              <div className="bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-lg border border-slate-100 dark:border-slate-800/50 flex gap-2">
+                                <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                                <p className="text-[10px] text-slate-500 italic line-clamp-1">{item.faultDescription}</p>
                               </div>
                             )}
                           </div>
                           <button 
                             type="button" 
                             onClick={() => handleRemoveItem(idx)}
-                            className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-all ml-4"
+                            className="p-2.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-all ml-4"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={20} />
                           </button>
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Sticky Footer */}
-              <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex justify-between items-center">
-                <div className="hidden md:block">
-                  {newRma.items.length > 0 && (
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Total de Artigos: <span className="text-slate-900 dark:text-white">{newRma.items.reduce((acc, curr) => acc + curr.quantity, 0)}</span>
-                    </p>
                   )}
                 </div>
-                <div className="flex gap-3 w-full md:w-auto">
+
+              {/* Sticky Footer */}
+              <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex justify-between items-center relative z-20">
+                <div className="hidden md:block">
+                  {newRma.items.length > 0 && (
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Resumo do Pedido</span>
+                      <p className="text-[11px] font-black text-slate-600 dark:text-slate-300">
+                        Total de Artigos: <span className="text-blue-600 dark:text-blue-400">{newRma.items.reduce((acc, curr) => acc + curr.quantity, 0)}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-4 w-full md:w-auto">
                   <button 
                     type="button" 
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 md:flex-none px-6 py-3 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-black text-xs uppercase tracking-widest rounded-xl transition-all"
+                    className="flex-1 md:flex-none px-8 py-3.5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 font-black text-[10px] uppercase tracking-[0.2em] rounded-xl transition-all"
                   >
-                    Cancelar
+                    Encerrar
                   </button>
                   <button 
                     type="submit" 
-                    disabled={isSubmitting || newRma.items.length === 0}
-                    className="flex-[2] md:flex-none px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-xl shadow-blue-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 active:translate-y-0"
+                    disabled={isSubmitting || newRma.items.length === 0 || isAddingItem}
+                    className="flex-[2] md:flex-none px-12 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl shadow-xl shadow-blue-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed transform hover:-translate-y-0.5 active:translate-y-0"
                   >
-                    {isSubmitting ? 'A Processar...' : (editingId ? 'Salvar Alterações' : 'Finalizar RMA')}
+                    {isSubmitting ? 'A Processar...' : (editingId ? 'Salvar RMA' : 'Finalizar RMA')}
                   </button>
                 </div>
               </div>

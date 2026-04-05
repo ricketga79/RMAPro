@@ -18,6 +18,8 @@ export interface RMAItem {
   repairDescription?: string;
   repairStatus?: string;
   warranty: "Ativa" | "Expirada";
+  supplierId?: string;
+  supplierName?: string;
 }
 
 export interface RMA {
