@@ -61,6 +61,18 @@ export const SupplierRMAManagement = () => {
     'Reparado/Substituído': 'Reparado/Substituído'
   };
 
+  const clientToSupplierStatus: Record<string, string> = {
+    'Aguarda Envio ao Fornecedor': 'Pendente de Envio',
+    'Enviado ao Fornecedor': 'Enviado ao Fornecedor',
+    'Crédito do Fornecedor': 'Crédito do Fornecedor',
+    'Reparado/Substituído': 'Reparado/Substituído'
+  };
+
+  const getSupplierLabel = (status: string | undefined): string => {
+    if (!status) return 'Pendente de Envio';
+    return clientToSupplierStatus[status] || status;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     
@@ -238,10 +250,23 @@ export const SupplierRMAManagement = () => {
     setIsSubmitting(true);
     setErrorMsg(null);
 
+    // Determine the most "urgent" or "primary" supplier status for the RMA summary
+    const supplierStatuses = (newRma.items || []).map(item => getSupplierLabel(item.repairStatus));
+    let overallSupplierStatus = 'Pendente de Envio';
+    
+    if (supplierStatuses.length > 0) {
+      if (supplierStatuses.every(s => s === 'Reparado/Substituído' || s === 'Crédito do Fornecedor')) {
+        overallSupplierStatus = 'Reparado/Substituído';
+      } else if (supplierStatuses.some(s => s === 'Enviado ao Fornecedor')) {
+        overallSupplierStatus = 'Enviado ao Fornecedor';
+      }
+    }
+
     const payload: any = {
       customer_id: newRma.customerId,
       supplier_id: newRma.supplierId || null,
       status: newRma.status,
+      supplier_status: overallSupplierStatus,
       odoo_doc: newRma.odooDoc?.trim(),
       updated_at: new Date().toISOString()
     };
@@ -492,8 +517,8 @@ export const SupplierRMAManagement = () => {
                                 )}
                                 <div className="mt-1">
                                   <StatusBadge 
-                                    status={rma.supplierStatus || 'Pendente de Envio'} 
-                                    color={statuses.find(s => s.name === rma.supplierStatus)?.color} 
+                                    status={getSupplierLabel(item.repairStatus)} 
+                                    color={statuses.find(s => s.name === getSupplierLabel(item.repairStatus))?.color || statuses.find(s => s.name === item.repairStatus)?.color} 
                                   />
                                 </div>
                               </div>
@@ -635,10 +660,10 @@ export const SupplierRMAManagement = () => {
 
                       {item.repairStatus && (
                         <div className="flex items-center gap-2 relative z-10">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado Cliente:</span>
+                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Estado Item:</span>
                           <StatusBadge 
-                            status={item.repairStatus} 
-                            color={statuses.find(s => s.name === item.repairStatus)?.color} 
+                            status={getSupplierLabel(item.repairStatus)} 
+                            color={statuses.find(s => s.name === getSupplierLabel(item.repairStatus))?.color || statuses.find(s => s.name === item.repairStatus)?.color} 
                           />
                         </div>
                       )}

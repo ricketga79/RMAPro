@@ -458,9 +458,12 @@ export const RMAManagement = () => {
     console.log('[DEBUG] handleSaveRma - payload:', payload);
 
     const hasSupplierStatus = newRma.items.some(item => item.repairStatus === 'Aguarda Envio ao Fornecedor');
-    console.log('[DEBUG] handleSaveRma - hasSupplierStatus:', hasSupplierStatus, 'items:', newRma.items);
-
-    if (hasSupplierStatus || newRma.status === 'Aguarda Envio ao Fornecedor') {
+    const isEnviado = newRma.items.some(item => item.repairStatus === 'Enviado ao Fornecedor');
+    
+    if (isEnviado) {
+      payload.is_supplier_active = true;
+      payload.supplier_status = 'Enviado ao Fornecedor';
+    } else if (hasSupplierStatus || newRma.status === 'Aguarda Envio ao Fornecedor') {
       payload.is_supplier_active = true;
       payload.supplier_status = 'Pendente de Envio';
     } else if (editingId) {
