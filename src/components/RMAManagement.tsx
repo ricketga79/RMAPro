@@ -34,6 +34,7 @@ export const RMAManagement = () => {
   const [activeFilter, setActiveFilter] = useState<'open' | 'completed' | 'all'>('open');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isAddingItem, setIsAddingItem] = useState(false);
 
   const [newRma, setNewRma] = useState({
     customerId: '',
@@ -864,7 +865,6 @@ export const RMAManagement = () => {
                   </div>
                 )}
 
-                {/* Section 1: General Info */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-1 h-4 bg-blue-600 rounded-full"></div>
@@ -885,6 +885,29 @@ export const RMAManagement = () => {
                           <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                       </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Fornecedor</label>
+                      <select 
+                        value={newRma.supplierId}
+                        onChange={e => setNewRma({...newRma, supplierId: e.target.value})}
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white transition-all"
+                      >
+                        <option value="">Selecionar Fornecedor</option>
+                        {suppliers.map(s => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5 font-mono">Doc. Odoo</label>
+                      <input 
+                        type="text" 
+                        value={newRma.odooDoc}
+                        onChange={e => setNewRma({...newRma, odooDoc: e.target.value})}
+                        placeholder="Ex: INV/2024/001"
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white font-mono transition-all"
+                      />
                     </div>
                   </div>
                 </div>
